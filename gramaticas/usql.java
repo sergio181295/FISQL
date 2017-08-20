@@ -4,24 +4,25 @@ tipo -> TEXT
       |BOOL
       |DATE
       |DATETIME
+      |ID
 
 //VARIABLES INICIAN CON @
 
-valor -> valor + valor
-        |valor - valor
-        |valor * valor
-        |valor / valor
-        |valor ^ valor
-        |valor == valor
-        |valor != valor
-        |valor < valor
-        |valor <= valor
-        |valor > valor
-        |valor >= valor
-        |valor && valor
-        |valor || valor
-        |- valor
-        |! valor
+valor -> valor MAS valor
+        |valor MENOS valor
+        |valor POR valor
+        |valor DIVISION valor
+        |valor POTENCIA valor
+        |valor IGUALIGUAL valor
+        |valor NOIGUAL valor
+        |valor MENOR valor
+        |valor MENORIGUAL valor
+        |valor MAYOR valor
+        |valor MAYORIGUAL valor
+        |valor AND valor
+        |valor OR valor
+        |MENOS valor
+        |NOT valor
         |( valor )
         |llamada
         |CADENA
@@ -29,8 +30,12 @@ valor -> valor + valor
         |VERDADERO
         |FALSO
         |CARACTER
+        |fecha
+        |fechahora
 
 llamada -> llamada PAR1 enviados PAR2 
+      |llamada PAR1 PAR2
+      |llamada PUNTO ID
       |ID
 
 enviados -> enviados COMA valor
@@ -127,14 +132,88 @@ enviados -> enviados COMA valor
             seleccionar -> seleccionar ORDENAR_POR ID tipoOrden
                         |seleccionar DONDE valor
                         |seleccionar PUNTOYCOMA
-                        |SELECCIONAR camposSeleccion DE enviados
+                        |SELECCIONAR seleccionCampos DE enviados
 
             tipoOrden -> ASC
                         |DESC
 
-            camposSeleccion -> ASTERISCO
+            seleccionCampos -> ASTERISCO
                               |enviados
 
+/** SENTENCIAS DCL */
+      sentenciasDCL -> sentenciasDCL dcl
+                        |dcl
+
+      dcl -> otorgar
+            |denegar
+
+      //DCL OTORGAR
+            otorgar -> OTORGAR PERMISOS ID  COMA ID PUNTO seleccionCampos PUNTOYCOMA
+
+      //DCL DENEGAR
+            denegar -> DENEGAR PERMISOS ID COMA ID PUNTO seleccionCampos PUNTOYCOMA
+
+/** SENTENCIAS SSL */
+      sentenciasSSL -> sentenciasSSL ssl
+                        |ssl
+
+      ssl -> declaracion PUNTOYCOMA
+            |asignacion
+            |si
+            |selecciona
+            |para
+            |mientras
+            |detener
+            |imprimir
+            |fecha
+            |fechahora
+            |contar
+
+      //SSL DECLARACION
+            declaracion -> declaracion IGUAL valor
+                        |DECLARAR listId tipo
+
+            listId -> listId COMA ID
+                  |ID
+
+      //SSL ASIGNACION
+            asignacion -> ID IGUAL valor PUNTOYCOMA
+
+      //SSL SI
+            si -> si SINO LLA1 sentenciasSSL LLA2
+                  |SI PAR1 valor PAR2 LLA1 sentenciasSSL LLA2
+      
+      //SS SELECCIONA
+            selecciona -> SELECCIONA PAR1 varlor PAR2 LLA1 casos LLA2
+
+            casos -> casos caso
+                  |caso
+
+            caso -> CASO valor DOSPUNTOS sentencias
+                  |DEFECTO DOSPUNTOS sentencias
+
+      //SSL PARA
+            para -> PARA PAR1 DECLARAR ID INTEGER PUNTOYCOMA valor PUNTOYCOMA paso PAR2 LLA1 sentenciasSSL LLA2
+
+            paso -> INCREMENTO 
+                  |DECREMENTO
+
+      //SSL MIENTRAS
+            mientras -> MIENTRAS PAR1 valor PAR2 LLA1 sentenciasSSL LLA2
+
+      //SSL DETENER
+            detener -> DETENER PUNTOYCOMA
+
+      //SSL IMPRIMIR
+            imprimir -> IMPRIMIR PAR1 valor PAR2 PUNTOYCOMA
+
+      //SSL FECHA Y HORA
+            fecha -> FECHA PAR1 PAR2 PUNTOYCOMA
+
+            fechahora -> FECHA_HORA PAR1 PA2 PUNTOYCOMA
+
+      //SSL CONTAR
+            contar -> CONTAR PAR1 
 etorno -> RETORNO valor PUNTOYCOMA
 
 
