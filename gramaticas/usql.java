@@ -1,45 +1,12 @@
-tipo -> TEXT
-      |INTEGER
-      |DOUBLE
-      |BOOL
-      |DATE
-      |DATETIME
-      |ID
+inicio -> sentencias
 
-//VARIABLES INICIAN CON @
+sentencias -> sentencias sentencia
+            |sentencia
 
-valor -> valor MAS valor
-        |valor MENOS valor
-        |valor POR valor
-        |valor DIVISION valor
-        |valor POTENCIA valor
-        |valor IGUALIGUAL valor
-        |valor NOIGUAL valor
-        |valor MENOR valor
-        |valor MENORIGUAL valor
-        |valor MAYOR valor
-        |valor MAYORIGUAL valor
-        |valor AND valor
-        |valor OR valor
-        |MENOS valor
-        |NOT valor
-        |( valor )
-        |llamada
-        |CADENA
-        |NUMERO
-        |VERDADERO
-        |FALSO
-        |CARACTER
-        |fecha
-        |fechahora
-
-llamada -> llamada PAR1 enviados PAR2 
-      |llamada PAR1 PAR2
-      |llamada PUNTO ID
-      |ID
-
-enviados -> enviados COMA valor
-            |valor
+sentencia -> ddl
+            |dml
+            |dcl
+            |ssl
 
 /** OBJETOS USQL
       BASE DE DATOS
@@ -50,15 +17,13 @@ enviados -> enviados COMA valor
 */
 
 /** SENTENCIAS DDL */
-      sentenciasDDL -> sentenciasDDL ddl
-                        |ddl
-
       ddl -> crear  
             |usar
             |alterar
             |eliminar
             |backup
             |restaurar
+            |retorno
 
       //DDL CREAR
             crear -> CREAR crearCosa
@@ -66,8 +31,8 @@ enviados -> enviados COMA valor
             crearCosa -> BASE_DATOS ID PUNTOYCOMA
                         |TABLA ID PAR1 atrTabla PAR2 PUNTOYCOMA 
                         |OBJETO ID PAR1 atrTabla PAR2 PUNTOYCOMA
-                        |PROCEDIMIENTO ID PAR1 atrTabla PAR2 LLA1 sentenciasDML LLA2
-                        |FUNCION ID PAR1 atrTabla PAR2 tipo LLA1 sentenciasDML LLA2
+                        |PROCEDIMIENTO ID PAR1 atrTabla PAR2 LLA1  LLA2
+                        |FUNCION ID PAR1 atrTabla PAR2 tipo LLA1 sentencias LLA2
                         |USUARIO ID COLOCAR PASSWORD IGUAL valor PUNTOYCOMA
             
             atrTabla -> atrTabla COMA tipo ID 
@@ -87,14 +52,11 @@ enviados -> enviados COMA valor
       //DDL ALTERAR
             alterar -> ALTERAR alterarCosa
 
-            alterarCosa -> TABLA ID alterarTabla PUNTOYCOMA
-                        |OBJETO ID alterarObjeto PUNTOYCOMA
+            alterarCosa -> TABLA ID tipoAlterar PUNTOYCOMA
+                        |OBJETO ID tipoAlterar PUNTOYCOMA
                         |USUARIO ID CAMBIAR PASSWORD IGUAL valor PUNTOYCOMA
 
-            alterarTabla -> AGREGAR PAR1 atrTabla PAR2
-                        |QUITAR enviados
-
-            alterarObjeto -> AGREGAR PAR1 atrTabla PAR2
+            tipoAlterar -> AGREGAR PAR1 atrTabla PAR2
                         |QUITAR enviados
 
       //DDL ELIMINAR
@@ -114,15 +76,9 @@ enviados -> enviados COMA valor
       //DDL RESTAURAR
             restaurar -> RESTAURAR tipoBackup CADENA PUNTOYCOMA
 
-            tipoBackup -> USQLDUMP   
-                        |COMPLETO
-
       retorno -> RETORNO valor PUNTOYCOMA
 
 /** SENTENCIAS DML */
-      sentenciasDML -> sentenciasDML dml
-                        |dml
-
       dml -> insertar
             |actualizar
             |borrar
@@ -157,9 +113,6 @@ enviados -> enviados COMA valor
                               |enviados
 
 /** SENTENCIAS DCL */
-      sentenciasDCL -> sentenciasDCL dcl
-                        |dcl
-
       dcl -> otorgar
             |denegar
 
@@ -170,9 +123,6 @@ enviados -> enviados COMA valor
             denegar -> DENEGAR PERMISOS ID COMA ID PUNTO seleccionCampos PUNTOYCOMA
 
 /** SENTENCIAS SSL */
-      sentenciasSSL -> sentenciasSSL ssl
-                        |ssl
-
       ssl -> declaracion PUNTOYCOMA
             |asignacion
             |si
@@ -196,8 +146,8 @@ enviados -> enviados COMA valor
             asignacion -> ID IGUAL valor PUNTOYCOMA
 
       //SSL SI
-            si -> si SINO LLA1 sentenciasSSL LLA2
-                  |SI PAR1 valor PAR2 LLA1 sentenciasSSL LLA2
+            si -> si SINO LLA1 sentencias LLA2
+                  |SI PAR1 valor PAR2 LLA1 sentencias LLA2
       
       //SS SELECCIONA
             selecciona -> SELECCIONA PAR1 varlor PAR2 LLA1 casos LLA2
@@ -209,13 +159,13 @@ enviados -> enviados COMA valor
                   |DEFECTO DOSPUNTOS sentencias
 
       //SSL PARA
-            para -> PARA PAR1 DECLARAR ID INTEGER PUNTOYCOMA valor PUNTOYCOMA paso PAR2 LLA1 sentenciasSSL LLA2
+            para -> PARA PAR1 DECLARAR ID INTEGER IGUAL valor PUNTOYCOMA valor PUNTOYCOMA paso PAR2 LLA1 sentencias LLA2
 
-            paso -> INCREMENTO 
-                  |DECREMENTO
+            paso -> MASMAS
+                  |MENOSMENOS
 
       //SSL MIENTRAS
-            mientras -> MIENTRAS PAR1 valor PAR2 LLA1 sentenciasSSL LLA2
+            mientras -> MIENTRAS PAR1 valor PAR2 LLA1 sentencias LLA2
 
       //SSL DETENER
             detener -> DETENER PUNTOYCOMA
@@ -231,10 +181,48 @@ enviados -> enviados COMA valor
       //SSL CONTAR
             contar -> CONTAR PAR1 MENOR MENOR seleccionar MAYOR MAYOR PAR2 PUNTOYCOMA
 
-/** BACKUP Y RESTAURACION */
-      //BACKUP
             
+tipo -> TEXT
+      |INTEGER
+      |DOUBLE
+      |BOOL
+      |DATE
+      |DATETIME
+      |ID
 
+//VARIABLES INICIAN CON @
+
+valor -> valor MAS valor
+        |valor MENOS valor
+        |valor POR valor
+        |valor DIV valor
+        |valor POT valor
+        |valor IGUALIGUAL valor
+        |valor NOIGUAL valor
+        |valor MENOR valor
+        |valor MENORIGUAL valor
+        |valor MAYOR valor
+        |valor MAYORIGUAL valor
+        |valor AND valor
+        |valor OR valor
+        |MENOS valor
+        |NOT valor
+        |( valor )
+        |llamada
+        |CADENA
+        |NUMERO
+        |VERDADERO
+        |FALSO
+        |fecha
+        |fechahora
+
+llamada -> llamada PAR1 enviados PAR2 
+      |llamada PAR1 PAR2
+      |llamada PUNTO ID
+      |ID
+
+enviados -> enviados COMA valor
+            |valor
 
 
 
