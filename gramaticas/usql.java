@@ -57,6 +57,8 @@ enviados -> enviados COMA valor
             |usar
             |alterar
             |eliminar
+            |backup
+            |restaurar
 
       //DDL CREAR
             crear -> CREAR crearCosa
@@ -102,6 +104,20 @@ enviados -> enviados COMA valor
                         |BASE_DATOS ID PUNTOYCOMA
                         |OBJETO ID PUNTOYCOMA 
                         |USUARIO ID PUNTOYCOMA
+
+      //DDL BACKUP
+            backup -> BACKUP tipoBackup ID ID PUNTOYCOMA
+
+            tipoBackup -> USQLDUMP   
+                        |COMPLETO
+      
+      //DDL RESTAURAR
+            restaurar -> RESTAURAR tipoBackup CADENA PUNTOYCOMA
+
+            tipoBackup -> USQLDUMP   
+                        |COMPLETO
+
+      retorno -> RETORNO valor PUNTOYCOMA
 
 /** SENTENCIAS DML */
       sentenciasDML -> sentenciasDML dml
@@ -213,10 +229,11 @@ enviados -> enviados COMA valor
             fechahora -> FECHA_HORA PAR1 PA2 PUNTOYCOMA
 
       //SSL CONTAR
-            contar -> CONTAR PAR1 
-etorno -> RETORNO valor PUNTOYCOMA
+            contar -> CONTAR PAR1 MENOR MENOR seleccionar MAYOR MAYOR PAR2 PUNTOYCOMA
 
-
+/** BACKUP Y RESTAURACION */
+      //BACKUP
+            
 
 
 
