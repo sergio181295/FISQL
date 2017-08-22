@@ -1,7 +1,9 @@
 inicio -> sentencias
 
-sentencias -> sentencias sentencia
-            |sentencia
+sentencias -> sentencia sentencias2
+
+sentencias2 -> sentencia sentencias2
+            |epsilon
 
 sentencia -> ddl
             |dml
@@ -34,10 +36,12 @@ sentencia -> ddl
                         |PROCEDIMIENTO ID PAR1 atrTabla PAR2 LLA1  LLA2
                         |FUNCION ID PAR1 atrTabla PAR2 tipo LLA1 sentencias LLA2
                         |USUARIO ID COLOCAR PASSWORD IGUAL valor PUNTOYCOMA
-            
-            atrTabla -> atrTabla COMA tipo ID 
-                        |atrTabla complemento
-                        |tipo ID
+
+            atrTabla -> tipo ID atrTabla2
+
+            atrTabla2 -> COMA tipo ID atrTabla2
+                        |complemento atrTabla2
+                        |epsilon
 
             complemento -> NULO 
                         |NO_NULO
@@ -79,32 +83,32 @@ sentencia -> ddl
       retorno -> RETORNO valor PUNTOYCOMA
 
 /** SENTENCIAS DML */
-      dml -> insertar
-            |actualizar
-            |borrar
-            |seleccionar
+      dml -> insertar 
+            |actualizar PUNTOYCOMA
+            |borrar PUNTOYCOMA
+            |seleccionar PUNTOYCOMA
 
       //DML INSERTAR
             insertar -> INSERTAR EN TABLA ID tipoInsertar PUNTOYCOMA
 
-            tipoInsertar -> tipoInsertar VALORES PAR1 enviados PAR2
-                        |PAR1 enviados PAR2 
+            tipoInsertar -> PAR1 enviados PAR2 tipoInsertar2
+
+            tipoInsertar2 -> VALORES PAR1 enviados PAR2
+                            |epsilon
 
       //DML ACTUALIZAR
-            actualizar -> actualizar DONDE valor
-                        |actualizar PUNTOYCOMA
-                        |ACTUALIZAR TABLA ID PAR1 enviados PAR2 VALORES PAR1 enviados PAR2
+            actualizar -> ACTUALIZAR TABLA ID PAR1 enviados PAR2 VALORES PAR1 enviados PAR2 restricciones
+
+            restricciones -> DONDE valor restricciones
+                        |ORDENAR_POR ID tipoOrden restricciones
+                        |epsilon
+
 
       //DML BORRAR
-            borrar -> borrar DONDE valor
-                  |borrar PUNTOYCOMA
-                  |BORRAR EN TABLA ID 
+            borrar -> BORRAR EN TABLA ID restricciones
 
       //DML SELECCIONAR
-            seleccionar -> seleccionar ORDENAR_POR ID tipoOrden
-                        |seleccionar DONDE valor
-                        |seleccionar PUNTOYCOMA
-                        |SELECCIONAR seleccionCampos DE enviados
+            seleccionar -> SELECCIONAR seleccionCampos DE enviados seleccionar2
 
             tipoOrden -> ASC
                         |DESC
@@ -136,24 +140,31 @@ sentencia -> ddl
             |contar
 
       //SSL DECLARACION
-            declaracion -> declaracion IGUAL valor
-                        |DECLARAR listId tipo
+            declaracion -> DECLARAR listId tipo conValor
 
-            listId -> listId COMA ID
-                  |ID
+            conValor -> IGUAL valor
+                        |epsilon
 
+            listId -> ID listId2
+            
+            listId2 -> COMA ID listId2
+                        |epsilon
       //SSL ASIGNACION
             asignacion -> ID IGUAL valor PUNTOYCOMA
 
       //SSL SI
-            si -> si SINO LLA1 sentencias LLA2
-                  |SI PAR1 valor PAR2 LLA1 sentencias LLA2
+            si -> SI PAR1 valor PAR2 LLA1 sentencias LLA2 sino
+
+            sino -> SINO LLA1 sentencias LLA2
+                  |epsilon
       
       //SS SELECCIONA
             selecciona -> SELECCIONA PAR1 varlor PAR2 LLA1 casos LLA2
 
-            casos -> casos caso
-                  |caso
+            casos -> caso casos2
+
+            casos2 -> caso casos2
+                  |epsilon
 
             caso -> CASO valor DOSPUNTOS sentencias
                   |DEFECTO DOSPUNTOS sentencias
@@ -176,7 +187,7 @@ sentencia -> ddl
       //SSL FECHA Y HORA
             fecha -> FECHA PAR1 PAR2 PUNTOYCOMA
 
-            fechahora -> FECHA_HORA PAR1 PA2 PUNTOYCOMA
+            fechahora -> FECHA_HORA PAR1 PAR2 PUNTOYCOMA
 
       //SSL CONTAR
             contar -> CONTAR PAR1 MENOR MENOR seleccionar MAYOR MAYOR PAR2 PUNTOYCOMA
@@ -192,37 +203,45 @@ tipo -> TEXT
 
 //VARIABLES INICIAN CON @
 
-valor -> valor OR valor21
-	|valor21
+valor -> valor21 valorP
 
-valor3 -> valor3 AND valor31
-		|valor31
+valorP -> OR valor21 valorP
+      |epsilon
+
+valor3 -> valor31 valor3P
+
+valor3P -> AND valor31 valor3P
+      |epsilon
 
 valor31 -> NOT valor4
 		|valor4
 
-valor4 -> valor4 MAYOR valor5
-		|valor4 MENOR valor5
-		|valor4 MAYORIGUAL valor5
-		|valor4 MENORIGUAL valor5
-		|valor4 IGUALIGUAL valor5
-		|valor4 NOIGUAL valor5
-		|valor5
+valor4 -> valor5 valor4P
 
-valor5 -> valor5 MAS valor6
-		|valor5 MENOS valor6
-		|valor6
+valor4P -> MAYOR valor5 valor4P
+      |MENOR valor5 valor4P
+      |MAYORIGUAL valor5 valor4P
+      |MENORIGUAL valor5 valor4P
+      |IGUALIGUAL valor5 valor4P
+      |NOIGUAL valor5 valor4P
+      |epsilon
 
-valor6 -> valor6 POR valor7
-		|valor6 DIV valor7
-		|valor7
+valor5 -> valor6 valor5P
 
-valor7 -> valor7 POT valor8
-		|valor8
+valor5P -> MAS valor6 valor5P
+      |MENOR valor6 valor5P
+      |epsilon
 
-valor8 -> valor8 MASMAS
-		|valor8 MENOSMENOS
-		|valor9
+valor6 -> valor7 valor6P
+
+valor6P -> POR valor7 valor6P
+      |DIV valor7 valor6P
+      |epsilon
+
+valor7 -> valor8 valor7P
+
+valor7P -> POT valor8 valor7P
+      |epsilon
 
 valor9 ->   CADENA
 		|NUMERO
@@ -234,14 +253,19 @@ valor9 ->   CADENA
             |fechahora
 		|PAR1 valor PAR2
 
+llamada -> ID llamadaP
 
-llamada -> llamada PAR1 enviados PAR2 
-      |llamada PAR1 PAR2
-      |llamada PUNTO ID
-      |ID
+llamadaP -> PAR1 enviados PAR2 llamadaP
+      |PAR1 PAR2 llamadaP
+      |PUNTO ID llamadaP
+      |epsilon
 
-enviados -> enviados COMA valor
-            |valor
+enviados -> valor enviadosP
+
+enviadosP -> COMA valor enviadosP
+            |epsilon
+
+
 
 
 
