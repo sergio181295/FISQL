@@ -1,3 +1,7 @@
+options
+{
+  LOOKAHEAD=2;
+}
 PARSER_BEGIN(usql)
 import java.io.*;
  public class usql{
@@ -113,12 +117,7 @@ nodoParser inicio():{}{
 }
 
 nodoParser sentencias():{}{
-    sentencia() sentencias2()
-}
-
-nodoParser sentencias2():{}{
-    sentencia() sentencias2()
-    |epsilon()
+    (sentencia())+ 
 }
 
 nodoParser sentencia():{}{
@@ -154,14 +153,8 @@ nodoParser sentencia():{}{
         }
 
         nodoParser atrTabla():{}{
-          tipo() <ID> atrTabla2()  
+          tipo() <ID> (complemento())* (<COMA> tipo() <ID> (complemento())*)*
         } 
-
-        nodoParser atrTabla2():{}{
-            <COMA> tipo() <ID> atrTabla2()
-            |complemento() atrTabla2()
-            |epsilon()
-        }
 
         nodoParser complemento():{}{
             <NULO> 
@@ -233,36 +226,28 @@ nodoParser sentencia():{}{
       }
       //DML INSERTAR
             nodoParser insertar():{}{ 
-                <INSERTAR> <EN> <TABLA> <ID> tipoInsertar() <PUNTOYCOMA>
+                <INSERTAR> <EN> <TABLA> <ID> <PAR1> enviados() <PAR2> (<VALORES> <PAR1> enviados() <PAR2>)? <PUNTOYCOMA>
             }
 
-            nodoParser tipoInsertar():{}{ 
-                <PAR1> enviados() <PAR2> tipoInsertar2()
-            }
 
-            nodoParser tipoInsertar2():{}{ 
-                <VALORES> <PAR1> enviados() <PAR2>
-                |epsilon()
-            }
       //DML ACTUALIZAR
             nodoParser actualizar():{}{ 
-                <ACTUALIZAR> <TABLA> <ID> <PAR1> enviados() <PAR2> <VALORES> <PAR1> enviados() <PAR2> restricciones()
+                <ACTUALIZAR> <TABLA> <ID> <PAR1> enviados() <PAR2> <VALORES> <PAR1> enviados() <PAR2> (restricciones())*
             }
 
             nodoParser restricciones():{}{
-                <DONDE> valor() restricciones()
-                |<ORDENAR_POR> <ID> tipoOrden() restricciones()
-                |epsilon()
+                <DONDE> valor()
+                |<ORDENAR_POR> <ID> tipoOrden()
             }
 
       //DML BORRAR
             nodoParser borrar():{}{ 
-                <BORRAR> <EN> <TABLA> <ID> restricciones()
+                <BORRAR> <EN> <TABLA> <ID> (restricciones())*
             }
 
       //DML SELECCIONAR
             nodoParser seleccionar():{}{ 
-                <SELECCIONAR> seleccionCampos() <DE> enviados() restricciones()
+                <SELECCIONAR> seleccionCampos() <DE> enviados() (restricciones())*
             }
 
             nodoParser tipoOrden():{}{ 
@@ -277,8 +262,8 @@ nodoParser sentencia():{}{
 
 /** SENTENCIAS DCL */
       nodoParser dcl():{}{ 
-          otorgar()
-            |denegar()
+        otorgar()
+        |denegar()
       }
 
       //DCL OTORGAR
@@ -307,21 +292,7 @@ nodoParser sentencia():{}{
 
       //SSL DECLARACION
             nodoParser declaracion():{}{ 
-                <DECLARAR> listId() tipo() conValor()
-            }
-
-            nodoParser conValor():{}{ 
-                <IGUAL> valor()
-                |epsilon()
-            }
-
-            nodoParser listId():{}{ 
-                <ID> listId2()
-            }
-
-            nodoParser listId2():{}{ 
-                <COMA> <ID> listId2()
-                |epsilon()
+                <DECLARAR> <ID> (<COMA> <ID>)* tipo() (<IGUAL> valor())?
             }
 
       //SSL ASIGNACION
@@ -331,26 +302,12 @@ nodoParser sentencia():{}{
 
       //SSL SI
             nodoParser si():{}{ 
-                <SI> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2> sino()
-            }
-
-            nodoParser sino():{}{ 
-                <SINO> <LLA1> sentencias() <LLA2>
-                |epsilon()
+                <SI> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2> (<SINO> <LLA1> sentencias() <LLA2>)?
             }
 
       //SS SELECCIONA
             nodoParser selecciona():{}{ 
-                <SELECCIONA> <PAR1> valor() <PAR2> <LLA1> casos() <LLA2>
-            }
-
-            nodoParser casos():{}{ 
-                caso() casos2()
-            }
-
-            nodoParser casos2():{}{ 
-                caso() casos2()
-                |epsilon()
+                <SELECCIONA> <PAR1> valor() <PAR2> <LLA1> (caso())+ <LLA2>
             }
 
             nodoParser caso():{}{ 
@@ -410,69 +367,52 @@ nodoParser tipo():{}{ <TEXT>
 //VARIABLES INICIAN CON @
 
 nodoParser valor():{}{ 
-    valor3() valorP()
+    valor2() (<OR> valor2())*
 }
 
-nodoParser valorP():{}{ 
-    <OR> valor3() valorP()
-    |epsilon()
+nodoParser valor2():{}{ 
+    valor3() (<AND> valor3())*
 }
+
 
 nodoParser valor3():{}{ 
-    valor31() valor3P()
-}
-
-nodoParser valor3P():{}{ 
-    <AND> valor31() valor3P()
-    |epsilon()
-}
-
-nodoParser valor31():{}{ 
     <NOT> valor4()
     |valor4()
 }
 
 nodoParser valor4():{}{ 
-    valor5() valor4P()
+    valor5() (valor4P())*
 }
 
 nodoParser valor4P():{}{ 
-    <MAYOR> valor5() valor4P()
-      |<MENOR> valor5() valor4P()
-      |<MAYORIGUAL> valor5() valor4P()
-      |<MENORIGUAL> valor5() valor4P()
-      |<IGUALIGUAL> valor5() valor4P()
-      |<NOIGUAL> valor5() valor4P()
-      |epsilon()
+    <MAYOR> valor5() 
+      |<MENOR> valor5() 
+      |<MAYORIGUAL> valor5() 
+      |<MENORIGUAL> valor5() 
+      |<IGUALIGUAL> valor5() 
+      |<NOIGUAL> valor5() 
 }
 
 nodoParser valor5():{}{ 
-    valor6() valor5P()
+    valor6() (valor5P())*
 }
 
 nodoParser valor5P():{}{ 
-    <MAS> valor6() valor5P()
-    |<MENOR> valor6() valor5P()
-    |epsilon()
+    <MAS> valor6() 
+    |<MENOS> valor6() 
 }
 
 nodoParser valor6():{}{ 
-    valor7() valor6P()
+    valor7() (valor6P())*
 }
 
 nodoParser valor6P():{}{ 
-    <POR> valor7() valor6P()
-    |<DIV> valor7() valor6P()
-    |epsilon()
+    <POR> valor7()
+    |<DIV> valor7() 
 }
 
 nodoParser valor7():{}{ 
-    valor9() valor7P()
-}
-
-nodoParser valor7P():{}{ 
-    <POT> valor9() valor7P()
-    |epsilon()
+    valor9() (<POT> valor9())*
 }
 
 nodoParser valor9():{}{   
@@ -488,30 +428,11 @@ nodoParser valor9():{}{
 }
 
 nodoParser llamada():{}{ 
-    <ID> llamadaP()
-}
-
-nodoParser llamadaP():{}{ 
-    <PAR1> llamadaP2()
-    |<PUNTO> <ID> llamadaP()
-    |epsilon()
-}
-
-nodoParser llamadaP2():{}{
-    enviados() <PAR2> llamadaP()
-    |<PAR2> llamadaP()
+    <ID> (<PUNTO> <ID>)* (<PAR1> (enviados())? <PAR2>)?
 }
 
 nodoParser enviados():{}{ 
-    valor() enviadosP()
+    valor() (<COMA> valor())*
 }
 
-nodoParser enviadosP():{}{ 
-    <COMA> valor() enviadosP()
-    |epsilon()
-}
-
-nodoParser epsilon():{}{
-    <ASTERISCO>
-}
 
