@@ -1,0 +1,517 @@
+PARSER_BEGIN(usql)
+import java.io.*;
+ public class usql{
+ }
+PARSER_END(usql)
+
+SKIP:
+{
+ <"\t"|" "|"\n"|"\r">
+}
+
+TOKEN [IGNORE_CASE]:{
+    <INTEGER:"INTEGER">
+    |<DOUBLE:"DOUBLE">
+    |<DATE:"DATE">
+    |<TEXT:"TEXT">
+    |<BOOL:"BOOL">
+    |<DATETIME:"DATETIME">
+    |<VERDADERO:"VERDADERO">
+    |<FALSO:"FALSO">
+    |<CREAR:"CREAR">
+    |<BASE_DATOS:"BASE_DATOS">
+    |<TABLA:"TABLA">
+    |<OBJETO:"OBJETO">
+    |<PROCEDIMIENTO:"PROCEDIMIENTO">
+    |<FUNCION:"FUNCION">
+    |<USUARIO:"USUARIO">
+    |<COLOCAR:"COLOCAR">
+    |<PASSWORD:"PASSWORD">
+    |<NULO:"NULO">
+    |<NO_NULO:"NO_NULO">
+    |<AUTOINCREMENTABLE:"AUTOINCREMENTABLE">
+    |<LLAVE_PRIMARIA:"LLAVE_PRIMARIA">
+    |<LLAVE_FORANEA:"LLAVE_FORANEA">
+    |<REFERENCIA:"REFERENCIA">
+    |<UNICO:"UNICO">
+    |<USAR:"USAR">
+    |<ALTERAR:"ALTERAR">
+    |<CAMBIAR:"CAMBIAR">
+    |<AGREGAR:"AGREGAR">
+    |<QUITAR:"QUITAR">
+    |<ELIMINAR:"ELIMINAR">
+    |<BACKUP:"BACKUP">
+    |<RESTAURAR:"RESTAURAR">
+    |<USQLDUMP:"USQLDUMP">
+    |<COMPLETO:"COMPLETO">
+    |<RETORNO:"RETORNO">
+    |<INSERTAR:"INSERTAR">
+    |<EN:"EN">
+    |<VALORES:"VALORES">
+    |<DONDE:"DONDE">
+    |<ACTUALIZAR:"ACTUALIZAR">
+    |<BORRAR:"BORRAR">
+    |<ORDENAR_POR:"ORDENAR_POR">
+    |<SELECCIONAR:"SELECCIONAR">
+    |<DE:"DE">
+    |<ASC:"ASC">
+    |<DESC:"DESC">
+    |<OTORGAR:"OTORGAR">
+    |<DENEGAR:"DENEGAR">
+    |<PERMISOS:"PERMISOS">
+    |<DECLARAR:"DECLARAR">
+    |<SI:"SI">
+    |<SINO:"SINO">
+    |<SELECCIONA:"SELECCIONA">
+    |<CASO:"CASO">
+    |<DEFECTO:"DEFECTO">
+    |<PARA:"PARA">
+    |<MIENTRAS:"MIENTRAS">
+    |<DETENER:"DETENER">
+    |<IMPRIMIR:"IMPRIMIR">
+    |<FECHA:"FECHA">
+    |<FECHA_HORA:"FECHA_HORA">
+    |<CONTAR:"CONTAR">
+    
+    |<MAS:"+">
+    |<MENOS:"-">
+    |<POR:"*">
+    |<DIV:"/">
+    |<POT:"^">
+    |<MASMAS:"++">
+    |<MENOSMENOS:"--">
+    |<MENOR:"<">
+    |<MENORIGUAL:"<=">
+    |<MAYOR:">">
+    |<MAYORIGUAL:">=">
+    |<IGUALIGUAL:"==">
+    |<NOIGUAL:"!=">
+    |<OR:"||">
+    |<AND:"&&">
+    |<NOT:"!">
+    |<IGUAL:"=">
+    |<LLA1:"{">
+    |<LLA2:"}">
+    |<PAR1:"(">
+    |<PAR2:")">
+    |<PUNTO:".">
+    |<COMA:",">
+    |<PUNTOYCOMA:";">
+    |<DOSPUNTOS:":">
+    |<ASTERISCO:"%">
+
+    |<ID: ("@")?["a"-"z"](["a"-"z"]|["0"-"9"]|"_")*>
+    |<NUMERO:(["0"-"9"])+((["."]["0"-"9"])+)?>
+    |<CADENA: "\""(~["\n","\r"])*"\"">
+
+    |<COM1: "#"(~["\n","\r"])*>
+    |<COM2: "#*"(~[])*"*#">
+}
+
+nodoParser inicio():{}{
+    sentencias()
+}
+
+nodoParser sentencias():{}{
+    sentencia() sentencias2()
+}
+
+nodoParser sentencias2():{}{
+    sentencia() sentencias2()
+    |epsilon()
+}
+
+nodoParser sentencia():{}{
+    ddl()
+    |dml()
+    |dcl()
+    |ssl()
+}
+
+/** SENTENCIAS DDL */
+    nodoParser ddl():{}{
+        crear()
+        |usar()
+        |alterar()
+        |eliminar()
+        |backup()
+        |restaurar()
+        |retorno()
+    }
+
+    //DDL CREAR
+        nodoParser crear():{}{
+            <CREAR> crearCosa()
+        }
+
+        nodoParser crearCosa():{}{
+            <BASE_DATOS> <ID> <PUNTOYCOMA>
+            |<TABLA> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
+            |<OBJETO> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
+            |<PROCEDIMIENTO> <ID> <PAR1> atrTabla() <PAR2> <LLA1> sentencias()  <LLA2>
+            |<FUNCION> <ID> <PAR1> atrTabla() <PAR2> tipo() <LLA1> sentencias() <LLA2>
+            |<USUARIO> <ID> <COLOCAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
+        }
+
+        nodoParser atrTabla():{}{
+          tipo() <ID> atrTabla2()  
+        } 
+
+        nodoParser atrTabla2():{}{
+            <COMA> tipo() <ID> atrTabla2()
+            |complemento() atrTabla2()
+            |epsilon()
+        }
+
+        nodoParser complemento():{}{
+            <NULO> 
+            |<NO_NULO>
+            |<AUTOINCREMENTABLE>
+            |<LLAVE_PRIMARIA>
+            |<LLAVE_FORANEA> <REFERENCIA> <ID>
+            |<UNICO>
+        }
+
+        nodoParser retorno():{}{
+            <RETORNO> valor() <CADENA> <PUNTOYCOMA>
+        }
+
+    //DDL USAR
+        nodoParser usar():{}{
+            <USAR> <ID> <PUNTOYCOMA>
+        }
+
+    //DDL ALTERAR
+        nodoParser alterar():{}{
+            <ALTERAR> alterarCosa()
+        }
+
+        nodoParser alterarCosa():{}{
+            <TABLA> <ID> tipoAlterar() <PUNTOYCOMA>
+            |<OBJETO> <ID> tipoAlterar() <PUNTOYCOMA>
+            |<USUARIO> <ID> <CAMBIAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
+        }
+
+        nodoParser tipoAlterar():{}{
+            <AGREGAR> <PAR1> atrTabla() <PAR2>
+            |<QUITAR> enviados()
+        }
+    
+    //DDL ELIMINAR
+        nodoParser eliminar():{}{
+            <ELIMINAR> eliminarCosa()
+        }
+
+        nodoParsere eliminarCosa():{}{
+            <TABLA> <ID> <PUNTOYCOMA>
+            |<BASE_DATOS> <ID> <PUNTOYCOMA>
+            |<OBJETO> <ID> <PUNTOYCOMA>
+            |<USUARIO> <ID> <PUNTOYCOMA>    
+        }
+
+    //DDL BACKUP
+        nodoParser backup():{}{
+            <BACKUP> tipoBackup() <ID> <ID> <PUNTOYCOMA>
+        }
+
+        nodoParser tipoBackup():{}{
+            <USQLDUMP>
+            |<COMPLETO>
+        }
+
+    //DDL RESTAURAR
+        nodoParser restaurar():{}{
+            <RESTAURAR> tipoBackup() <CADENA> <PUNTOYCOMA>
+        }
+
+/** SENTENCIAS DML */
+      nodoParser dml():{}{ 
+        insertar() 
+        |actualizar() <PUNTOYCOMA>
+        |borrar() <PUNTOYCOMA>
+        |seleccionar() <PUNTOYCOMA>
+      }
+      //DML INSERTAR
+            nodoParser insertar():{}{ 
+                <INSERTAR> <EN> <TABLA> <ID> tipoInsertar() <PUNTOYCOMA>
+            }
+
+            nodoParser tipoInsertar():{}{ 
+                <PAR1> enviados() <PAR2> tipoInsertar2()
+            }
+
+            nodoParser tipoInsertar2():{}{ 
+                <VALORES> <PAR1> enviados() <PAR2>
+                |epsilon()
+            }
+      //DML ACTUALIZAR
+            nodoParser actualizar():{}{ 
+                <ACTUALIZAR> <TABLA> <ID> <PAR1> enviados() <PAR2> <VALORES> <PAR1> enviados() <PAR2> restricciones()
+            }
+
+            nodoParser restricciones():{}{
+                <DONDE> valor() restricciones()
+                |<ORDENAR_POR> <ID> tipoOrden() restricciones()
+                |epsilon()
+            }
+
+      //DML BORRAR
+            nodoParser borrar():{}{ 
+                <BORRAR> <EN> <TABLA> <ID> restricciones()
+            }
+
+      //DML SELECCIONAR
+            nodoParser seleccionar():{}{ 
+                <SELECCIONAR> seleccionCampos() <DE> enviados() restricciones()
+            }
+
+            nodoParser tipoOrden():{}{ 
+                <ASC>
+                |<DESC>
+            }
+
+            nodoParser seleccionCampos():{}{ 
+                <ASTERISCO>
+                |enviados()
+            }
+
+/** SENTENCIAS DCL */
+      nodoParser dcl():{}{ 
+          otorgar()
+            |denegar()
+      }
+
+      //DCL OTORGAR
+            nodoParser otorgar():{}{ 
+                <OTORGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
+            }
+      //DCL DENEGAR
+            nodoParser denegar():{}{ 
+                <DENEGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
+            }
+
+/** SENTENCIAS SSL */
+      nodoParser ssl():{}{ 
+        declaracion() <PUNTOYCOMA>
+        |asignacion()
+        |si()
+        |selecciona()
+        |para()
+        |mientras()
+        |detener()
+        |imprimir()
+        |fecha()
+        |fechahora()
+        |contar()
+      }
+
+      //SSL DECLARACION
+            nodoParser declaracion():{}{ 
+                <DECLARAR> listId() tipo() conValor()
+            }
+
+            nodoParser conValor():{}{ 
+                <IGUAL> valor()
+                |epsilon()
+            }
+
+            nodoParser listId():{}{ 
+                <ID> listId2()
+            }
+
+            nodoParser listId2():{}{ 
+                <COMA> <ID> listId2()
+                |epsilon()
+            }
+
+      //SSL ASIGNACION
+            nodoParser asignacion():{}{ 
+                <ID> <IGUAL> valor() <PUNTOYCOMA>
+            }
+
+      //SSL SI
+            nodoParser si():{}{ 
+                <SI> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2> sino()
+            }
+
+            nodoParser sino():{}{ 
+                <SINO> <LLA1> sentencias() <LLA2>
+                |epsilon()
+            }
+
+      //SS SELECCIONA
+            nodoParser selecciona():{}{ 
+                <SELECCIONA> <PAR1> valor() <PAR2> <LLA1> casos() <LLA2>
+            }
+
+            nodoParser casos():{}{ 
+                caso() casos2()
+            }
+
+            nodoParser casos2():{}{ 
+                caso() casos2()
+                |epsilon()
+            }
+
+            nodoParser caso():{}{ 
+                <CASO> valor() <DOSPUNTOS> sentencias()
+                |<DEFECTO> <DOSPUNTOS> sentencias()
+            }
+
+      //SSL PARA
+            nodoParser para():{}{ 
+                <PARA> <PAR1> <DECLARAR> <ID> <INTEGER> <IGUAL> valor() <PUNTOYCOMA> valor() <PUNTOYCOMA> paso() <PAR2> <LLA1> sentencias() <LLA2>
+            }
+
+            nodoParser paso():{}{ 
+                <MASMAS>
+                |<MENOSMENOS>
+            }
+
+      //SSL MIENTRAS
+            nodoParser mientras():{}{ 
+                <MIENTRAS> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2>
+            }
+
+      //SSL DETENER
+            nodoParser detener():{}{ 
+                <DETENER> <PUNTOYCOMA>
+            }
+
+      //SSL IMPRIMIR
+            nodoParser imprimir():{}{ 
+                <IMPRIMIR> <PAR1> valor() <PAR2> <PUNTOYCOMA>
+            }
+
+      //SSL FECHA Y HORA
+            nodoParser fecha():{}{ 
+                <FECHA> <PAR1> <PAR2> <PUNTOYCOMA>
+            }
+
+            nodoParser fechahora():{}{ 
+                <FECHA_HORA> <PAR1> <PAR2> <PUNTOYCOMA>
+            }
+
+      //SSL CONTAR
+            nodoParser contar():{}{ 
+                <CONTAR> <PAR1> <MENOR> <MENOR> seleccionar() <MAYOR> <MAYOR> <PAR2> <PUNTOYCOMA>
+            }
+
+            
+nodoParser tipo():{}{ <TEXT>
+      |<INTEGER>
+      |<DOUBLE>
+      |<BOOL>
+      |<DATE>
+      |<DATETIME>
+      |<ID>
+}
+
+//VARIABLES INICIAN CON @
+
+nodoParser valor():{}{ 
+    valor3() valorP()
+}
+
+nodoParser valorP():{}{ 
+    <OR> valor3() valorP()
+    |epsilon()
+}
+
+nodoParser valor3():{}{ 
+    valor31() valor3P()
+}
+
+nodoParser valor3P():{}{ 
+    <AND> valor31() valor3P()
+    |epsilon()
+}
+
+nodoParser valor31():{}{ 
+    <NOT> valor4()
+    |valor4()
+}
+
+nodoParser valor4():{}{ 
+    valor5() valor4P()
+}
+
+nodoParser valor4P():{}{ 
+    <MAYOR> valor5() valor4P()
+      |<MENOR> valor5() valor4P()
+      |<MAYORIGUAL> valor5() valor4P()
+      |<MENORIGUAL> valor5() valor4P()
+      |<IGUALIGUAL> valor5() valor4P()
+      |<NOIGUAL> valor5() valor4P()
+      |epsilon()
+}
+
+nodoParser valor5():{}{ 
+    valor6() valor5P()
+}
+
+nodoParser valor5P():{}{ 
+    <MAS> valor6() valor5P()
+    |<MENOR> valor6() valor5P()
+    |epsilon()
+}
+
+nodoParser valor6():{}{ 
+    valor7() valor6P()
+}
+
+nodoParser valor6P():{}{ 
+    <POR> valor7() valor6P()
+    |<DIV> valor7() valor6P()
+    |epsilon()
+}
+
+nodoParser valor7():{}{ 
+    valor9() valor7P()
+}
+
+nodoParser valor7P():{}{ 
+    <POT> valor9() valor7P()
+    |epsilon()
+}
+
+nodoParser valor9():{}{   
+    <CADENA>
+    |<NUMERO>
+    |<VERDADERO>
+    |<FALSO>
+    |<MENOS> valor9()
+    |llamada()
+    |fecha()
+    |fechahora()
+    |<PAR1> valor() <PAR2>
+}
+
+nodoParser llamada():{}{ 
+    <ID> llamadaP()
+}
+
+nodoParser llamadaP():{}{ 
+    <PAR1> llamadaP2()
+    |<PUNTO> <ID> llamadaP()
+    |epsilon()
+}
+
+nodoParser llamadaP2():{}{
+    enviados() <PAR2> llamadaP()
+    |<PAR2> llamadaP()
+}
+
+nodoParser enviados():{}{ 
+    valor() enviadosP()
+}
+
+nodoParser enviadosP():{}{ 
+    <COMA> valor() enviadosP()
+    |epsilon()
+}
+
+nodoParser epsilon():{}{
+    <ASTERISCO>
+}
+

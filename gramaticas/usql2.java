@@ -108,7 +108,7 @@ sentencia -> ddl
             borrar -> BORRAR EN TABLA ID restricciones
 
       //DML SELECCIONAR
-            seleccionar -> SELECCIONAR seleccionCampos DE enviados seleccionar2
+            seleccionar -> SELECCIONAR seleccionCampos DE enviados restricciones
 
             tipoOrden -> ASC
                         |DESC
@@ -159,7 +159,7 @@ sentencia -> ddl
                   |epsilon
       
       //SS SELECCIONA
-            selecciona -> SELECCIONA PAR1 varlor PAR2 LLA1 casos LLA2
+            selecciona -> SELECCIONA PAR1 valor PAR2 LLA1 casos LLA2
 
             casos -> caso casos2
 
@@ -269,3 +269,16 @@ enviadosP -> COMA valor enviadosP
 
 
 
+boolean Programa():{}
+{
+ (Lee()|Pon())
+  {
+   System.out.println("Es una instruccion aceptada");
+   return true;
+  }
+ |<eof>
+  {
+   System.out.println("Codigo analizado exitosamente");
+   return false;
+  }
+}

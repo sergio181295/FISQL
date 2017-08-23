@@ -4,17 +4,20 @@ public class GenerarAnalizadores {
     public static void main(String[] args) {
         //Generar("H","src/compilador/haskell");
         //Generar("HC","src/compilador/haskell");
-        Generar("U","src/servidorweb");
+        Generar("src/usql/usql.jj");
     }
     
-    public static void Generar(String tipo, String ruta){
+    public static void Generar(String ruta){
         try {
-            String opcFlex[] = {"FlexYCup/Lexico"+tipo+".jflex", "-d", ruta };
-            jflex.Main.generate(opcFlex);
-            String opcCUP[] = { "-destdir", ruta, "-parser", "parser"+tipo, "-symbols", "sym"+tipo, "FlexYCup/Sintactico"+tipo+".cup" };
-            java_cup.Main.main(opcCUP);
-        } catch (Exception e) {
-            e.printStackTrace();
+          String[] cmd = new String[2];
+          cmd[0] = "javacc";
+          cmd[1] = ruta;
+          Runtime rt = Runtime.getRuntime();
+          rt.exec( cmd );
+            System.out.println("generado");
+        } catch (Exception ex) {
+            System.out.println("error al generar");
+            ex.printStackTrace();
         }
     }
 }
