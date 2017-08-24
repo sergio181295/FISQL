@@ -3,6 +3,7 @@ options
   LOOKAHEAD=2;
 }
 PARSER_BEGIN(usql)
+package usql;
 import java.io.*;
  public class usql{
  }
@@ -107,20 +108,22 @@ TOKEN [IGNORE_CASE]:{
     |<ID: ("@")?["a"-"z"](["a"-"z"]|["0"-"9"]|"_")*>
     |<NUMERO:(["0"-"9"])+((["."]["0"-"9"])+)?>
     |<CADENA: "\""(~["\n","\r"])*"\"">
-
-    |<COM1: "#"(~["\n","\r"])*>
-    |<COM2: "#*"(~[])*"*#">
 }
 
-nodoParser inicio():{}{
-    sentencias()
+
+
+public boolean inicio():{}{
+    sentencias(){
+        System.out.println("Compilacion correcta!!");
+        return true;
+    }
 }
 
-nodoParser sentencias():{}{
-    (sentencia())+ 
+void sentencias():{}{
+    (sentencia())*
 }
 
-nodoParser sentencia():{}{
+void sentencia():{}{
     ddl()
     |dml()
     |dcl()
@@ -128,7 +131,7 @@ nodoParser sentencia():{}{
 }
 
 /** SENTENCIAS DDL */
-    nodoParser ddl():{}{
+    void ddl():{}{
         crear()
         |usar()
         |alterar()
@@ -139,11 +142,11 @@ nodoParser sentencia():{}{
     }
 
     //DDL CREAR
-        nodoParser crear():{}{
+        void crear():{}{
             <CREAR> crearCosa()
         }
 
-        nodoParser crearCosa():{}{
+        void crearCosa():{}{
             <BASE_DATOS> <ID> <PUNTOYCOMA>
             |<TABLA> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
             |<OBJETO> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
@@ -152,50 +155,50 @@ nodoParser sentencia():{}{
             |<USUARIO> <ID> <COLOCAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
         }
 
-        nodoParser atrTabla():{}{
+        void atrTabla():{}{
           tipo() <ID> (complemento())* (<COMA> tipo() <ID> (complemento())*)*
         } 
 
-        nodoParser complemento():{}{
+        void complemento():{}{
             <NULO> 
             |<NO_NULO>
             |<AUTOINCREMENTABLE>
             |<LLAVE_PRIMARIA>
-            |<LLAVE_FORANEA> <REFERENCIA> <ID>
+            |<LLAVE_FORANEA> <ID>
             |<UNICO>
         }
 
-        nodoParser retorno():{}{
-            <RETORNO> valor() <CADENA> <PUNTOYCOMA>
+        void retorno():{}{
+            <RETORNO> valor() <PUNTOYCOMA>
         }
 
     //DDL USAR
-        nodoParser usar():{}{
+        void usar():{}{
             <USAR> <ID> <PUNTOYCOMA>
         }
 
     //DDL ALTERAR
-        nodoParser alterar():{}{
+        void alterar():{}{
             <ALTERAR> alterarCosa()
         }
 
-        nodoParser alterarCosa():{}{
+        void alterarCosa():{}{
             <TABLA> <ID> tipoAlterar() <PUNTOYCOMA>
             |<OBJETO> <ID> tipoAlterar() <PUNTOYCOMA>
             |<USUARIO> <ID> <CAMBIAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
         }
 
-        nodoParser tipoAlterar():{}{
+        void tipoAlterar():{}{
             <AGREGAR> <PAR1> atrTabla() <PAR2>
             |<QUITAR> enviados()
         }
     
     //DDL ELIMINAR
-        nodoParser eliminar():{}{
+        void eliminar():{}{
             <ELIMINAR> eliminarCosa()
         }
 
-        nodoParsere eliminarCosa():{}{
+        void eliminarCosa():{}{
             <TABLA> <ID> <PUNTOYCOMA>
             |<BASE_DATOS> <ID> <PUNTOYCOMA>
             |<OBJETO> <ID> <PUNTOYCOMA>
@@ -203,80 +206,80 @@ nodoParser sentencia():{}{
         }
 
     //DDL BACKUP
-        nodoParser backup():{}{
+        void backup():{}{
             <BACKUP> tipoBackup() <ID> <ID> <PUNTOYCOMA>
         }
 
-        nodoParser tipoBackup():{}{
+        void tipoBackup():{}{
             <USQLDUMP>
             |<COMPLETO>
         }
 
     //DDL RESTAURAR
-        nodoParser restaurar():{}{
+        void restaurar():{}{
             <RESTAURAR> tipoBackup() <CADENA> <PUNTOYCOMA>
         }
 
 /** SENTENCIAS DML */
-      nodoParser dml():{}{ 
+      void dml():{}{ 
         insertar() 
         |actualizar() <PUNTOYCOMA>
         |borrar() <PUNTOYCOMA>
         |seleccionar() <PUNTOYCOMA>
       }
       //DML INSERTAR
-            nodoParser insertar():{}{ 
+            void insertar():{}{ 
                 <INSERTAR> <EN> <TABLA> <ID> <PAR1> enviados() <PAR2> (<VALORES> <PAR1> enviados() <PAR2>)? <PUNTOYCOMA>
             }
 
 
       //DML ACTUALIZAR
-            nodoParser actualizar():{}{ 
+            void actualizar():{}{ 
                 <ACTUALIZAR> <TABLA> <ID> <PAR1> enviados() <PAR2> <VALORES> <PAR1> enviados() <PAR2> (restricciones())*
             }
 
-            nodoParser restricciones():{}{
+            void restricciones():{}{
                 <DONDE> valor()
                 |<ORDENAR_POR> <ID> tipoOrden()
             }
 
       //DML BORRAR
-            nodoParser borrar():{}{ 
+            void borrar():{}{ 
                 <BORRAR> <EN> <TABLA> <ID> (restricciones())*
             }
 
       //DML SELECCIONAR
-            nodoParser seleccionar():{}{ 
+            void seleccionar():{}{ 
                 <SELECCIONAR> seleccionCampos() <DE> enviados() (restricciones())*
             }
 
-            nodoParser tipoOrden():{}{ 
+            void tipoOrden():{}{ 
                 <ASC>
                 |<DESC>
             }
 
-            nodoParser seleccionCampos():{}{ 
+            void seleccionCampos():{}{ 
                 <ASTERISCO>
                 |enviados()
             }
 
 /** SENTENCIAS DCL */
-      nodoParser dcl():{}{ 
+      void dcl():{}{ 
         otorgar()
         |denegar()
       }
 
       //DCL OTORGAR
-            nodoParser otorgar():{}{ 
+            void otorgar():{}{ 
                 <OTORGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
             }
       //DCL DENEGAR
-            nodoParser denegar():{}{ 
+            void denegar():{}{ 
                 <DENEGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
             }
 
 /** SENTENCIAS SSL */
-      nodoParser ssl():{}{ 
+      void ssl():{}{ 
         declaracion() <PUNTOYCOMA>
         |asignacion()
         |si()
@@ -287,75 +290,75 @@ nodoParser sentencia():{}{
         |imprimir()
         |fecha()
         |fechahora()
-        |contar()
+        |contar() <PUNTOYCOMA>
       }
 
       //SSL DECLARACION
-            nodoParser declaracion():{}{ 
+            void declaracion():{}{ 
                 <DECLARAR> <ID> (<COMA> <ID>)* tipo() (<IGUAL> valor())?
             }
 
       //SSL ASIGNACION
-            nodoParser asignacion():{}{ 
-                <ID> <IGUAL> valor() <PUNTOYCOMA>
+            void asignacion():{}{ 
+                llamada() <IGUAL> valor() <PUNTOYCOMA>
             }
 
       //SSL SI
-            nodoParser si():{}{ 
+            void si():{}{ 
                 <SI> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2> (<SINO> <LLA1> sentencias() <LLA2>)?
             }
 
       //SS SELECCIONA
-            nodoParser selecciona():{}{ 
+            void selecciona():{}{ 
                 <SELECCIONA> <PAR1> valor() <PAR2> <LLA1> (caso())+ <LLA2>
             }
 
-            nodoParser caso():{}{ 
+            void caso():{}{ 
                 <CASO> valor() <DOSPUNTOS> sentencias()
                 |<DEFECTO> <DOSPUNTOS> sentencias()
             }
 
       //SSL PARA
-            nodoParser para():{}{ 
+            void para():{}{ 
                 <PARA> <PAR1> <DECLARAR> <ID> <INTEGER> <IGUAL> valor() <PUNTOYCOMA> valor() <PUNTOYCOMA> paso() <PAR2> <LLA1> sentencias() <LLA2>
             }
 
-            nodoParser paso():{}{ 
+            void paso():{}{ 
                 <MASMAS>
                 |<MENOSMENOS>
             }
 
       //SSL MIENTRAS
-            nodoParser mientras():{}{ 
+            void mientras():{}{ 
                 <MIENTRAS> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2>
             }
 
       //SSL DETENER
-            nodoParser detener():{}{ 
+            void detener():{}{ 
                 <DETENER> <PUNTOYCOMA>
             }
 
       //SSL IMPRIMIR
-            nodoParser imprimir():{}{ 
+            void imprimir():{}{ 
                 <IMPRIMIR> <PAR1> valor() <PAR2> <PUNTOYCOMA>
             }
 
       //SSL FECHA Y HORA
-            nodoParser fecha():{}{ 
+            void fecha():{}{ 
                 <FECHA> <PAR1> <PAR2> <PUNTOYCOMA>
             }
 
-            nodoParser fechahora():{}{ 
+            void fechahora():{}{ 
                 <FECHA_HORA> <PAR1> <PAR2> <PUNTOYCOMA>
             }
 
       //SSL CONTAR
-            nodoParser contar():{}{ 
-                <CONTAR> <PAR1> <MENOR> <MENOR> seleccionar() <MAYOR> <MAYOR> <PAR2> <PUNTOYCOMA>
+            void contar():{}{ 
+                <CONTAR> <PAR1> <MENOR> <MENOR> seleccionar() <MAYOR> <MAYOR> <PAR2>
             }
 
             
-nodoParser tipo():{}{ <TEXT>
+void tipo():{}{ <TEXT>
       |<INTEGER>
       |<DOUBLE>
       |<BOOL>
@@ -366,25 +369,25 @@ nodoParser tipo():{}{ <TEXT>
 
 //VARIABLES INICIAN CON @
 
-nodoParser valor():{}{ 
+void valor():{}{ 
     valor2() (<OR> valor2())*
 }
 
-nodoParser valor2():{}{ 
+void valor2():{}{ 
     valor3() (<AND> valor3())*
 }
 
 
-nodoParser valor3():{}{ 
+void valor3():{}{ 
     <NOT> valor4()
     |valor4()
 }
 
-nodoParser valor4():{}{ 
+void valor4():{}{ 
     valor5() (valor4P())*
 }
 
-nodoParser valor4P():{}{ 
+void valor4P():{}{ 
     <MAYOR> valor5() 
       |<MENOR> valor5() 
       |<MAYORIGUAL> valor5() 
@@ -393,29 +396,29 @@ nodoParser valor4P():{}{
       |<NOIGUAL> valor5() 
 }
 
-nodoParser valor5():{}{ 
+void valor5():{}{ 
     valor6() (valor5P())*
 }
 
-nodoParser valor5P():{}{ 
+void valor5P():{}{ 
     <MAS> valor6() 
     |<MENOS> valor6() 
 }
 
-nodoParser valor6():{}{ 
+void valor6():{}{ 
     valor7() (valor6P())*
 }
 
-nodoParser valor6P():{}{ 
+void valor6P():{}{ 
     <POR> valor7()
     |<DIV> valor7() 
 }
 
-nodoParser valor7():{}{ 
+void valor7():{}{ 
     valor9() (<POT> valor9())*
 }
 
-nodoParser valor9():{}{   
+void valor9():{}{   
     <CADENA>
     |<NUMERO>
     |<VERDADERO>
@@ -424,14 +427,15 @@ nodoParser valor9():{}{
     |llamada()
     |fecha()
     |fechahora()
+    |contar()
     |<PAR1> valor() <PAR2>
 }
 
-nodoParser llamada():{}{ 
+void llamada():{}{ 
     <ID> (<PUNTO> <ID>)* (<PAR1> (enviados())? <PAR2>)?
 }
 
-nodoParser enviados():{}{ 
+void enviados():{}{ 
     valor() (<COMA> valor())*
 }
 

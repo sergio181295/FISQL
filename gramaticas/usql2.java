@@ -47,7 +47,7 @@ sentencia -> ddl
                         |NO_NULO
                         |AUTOINCREMENTABLE
                         |LLAVE_PRIMARIA
-                        |LLAVE_FORANEA REFERENCIA ID
+                        |LLAVE_FORANEA ID
                         |UNICO
 
       //DDL USAR 
@@ -137,7 +137,7 @@ sentencia -> ddl
             |imprimir
             |fecha
             |fechahora
-            |contar
+            |contar PUNTOYCOMA
 
       //SSL DECLARACION
             declaracion -> DECLARAR listId tipo conValor
@@ -150,7 +150,7 @@ sentencia -> ddl
             listId2 -> COMA ID listId2
                         |epsilon
       //SSL ASIGNACION
-            asignacion -> ID IGUAL valor PUNTOYCOMA
+            asignacion -> llamada IGUAL valor PUNTOYCOMA
 
       //SSL SI
             si -> SI PAR1 valor PAR2 LLA1 sentencias LLA2 sino
@@ -190,7 +190,7 @@ sentencia -> ddl
             fechahora -> FECHA_HORA PAR1 PAR2 PUNTOYCOMA
 
       //SSL CONTAR
-            contar -> CONTAR PAR1 MENOR MENOR seleccionar MAYOR MAYOR PAR2 PUNTOYCOMA
+            contar -> CONTAR PAR1 MENOR MENOR seleccionar MAYOR MAYOR PAR2 
 
             
 tipo -> TEXT
@@ -251,6 +251,7 @@ valor9 ->   CADENA
 		|llamada
             |fecha
             |fechahora
+            |contar
 		|PAR1 valor PAR2
 
 llamada -> ID llamadaP

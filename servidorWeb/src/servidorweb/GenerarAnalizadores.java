@@ -10,7 +10,7 @@ public class GenerarAnalizadores {
     public static void Generar(String ruta){
         try {
           String[] cmd = new String[2];
-          cmd[0] = "javacc";
+          cmd[0] = "C:\\javacc-5.0\\bin\\lib\\javacc.jar";
           cmd[1] = ruta;
           Runtime rt = Runtime.getRuntime();
           rt.exec( cmd );
