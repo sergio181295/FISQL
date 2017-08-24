@@ -103,7 +103,7 @@ TOKEN [IGNORE_CASE]:{
     |<COMA:",">
     |<PUNTOYCOMA:";">
     |<DOSPUNTOS:":">
-    |<ASTERISCO:"%">
+    |<ASTERISCO:"**">
 
     |<ID: ("@")?["a"-"z"](["a"-"z"]|["0"-"9"]|"_")*>
     |<NUMERO:(["0"-"9"])+((["."]["0"-"9"])+)?>
