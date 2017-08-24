@@ -32,13 +32,13 @@ CREAR TABLA Asignacion(
 
 CREAR PROCEDIMIENTO Asignar (INTEGER @id_e, INTEGER @id_c){
     DECLARAR @estudiante INTEGER = CONTAR(
-        <<SELECCIONAR % 
+        <<SELECCIONAR ** 
         DE estudiante 
         DONDE id == @id_e>>
     );
 
     DECLARAR @curso INTEGER= CONTAR(
-        <<SELECCIONAR % 
+        <<SELECCIONAR ** 
         DE curso 
         DONDE id == @id_c>>
     );

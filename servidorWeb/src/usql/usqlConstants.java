@@ -287,7 +287,7 @@ public interface usqlConstants {
     "\",\"",
     "\";\"",
     "\":\"",
-    "\"%\"",
+    "\"**\"",
     "<ID>",
     "<NUMERO>",
     "<CADENA>",
