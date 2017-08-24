@@ -23,6 +23,9 @@ static private int jjMoveStringLiteralDfa0_0()
       case 33:
          jjmatchedKind = 79;
          return jjMoveStringLiteralDfa1_0(0x0L, 0x1000L);
+      case 37:
+         jjmatchedKind = 89;
+         return jjMoveNfa_0(0, 0);
       case 38:
          return jjMoveStringLiteralDfa1_0(0x0L, 0x4000L);
       case 40:
@@ -33,7 +36,7 @@ static private int jjMoveStringLiteralDfa0_0()
          return jjMoveNfa_0(0, 0);
       case 42:
          jjmatchedKind = 66;
-         return jjMoveStringLiteralDfa1_0(0x0L, 0x2000000L);
+         return jjMoveNfa_0(0, 0);
       case 43:
          jjmatchedKind = 64;
          return jjMoveStringLiteralDfa1_0(0x0L, 0x20L);
@@ -163,13 +166,6 @@ static private int jjMoveStringLiteralDfa1_0(long active0, long active1)
          if ((active1 & 0x4000L) != 0L)
          {
             jjmatchedKind = 78;
-            jjmatchedPos = 1;
-         }
-         break;
-      case 42:
-         if ((active1 & 0x2000000L) != 0L)
-         {
-            jjmatchedKind = 89;
             jjmatchedPos = 1;
          }
          break;
@@ -1781,7 +1777,7 @@ null, null, null, null, null, null, null, null, null, null, null, null, null, nu
 null, null, null, null, null, null, null, null, null, "\53", "\55", "\52", "\57", 
 "\136", "\53\53", "\55\55", "\74", "\74\75", "\76", "\76\75", "\75\75", "\41\75", 
 "\174\174", "\46\46", "\41", "\75", "\173", "\175", "\50", "\51", "\56", "\54", "\73", 
-"\72", "\52\52", null, null, null, };
+"\72", "\45", null, null, null, };
 
 /** Lexer state names. */
 public static final String[] lexStateNames = {

@@ -13,12 +13,12 @@ import java.io.*;
   static final public void sentencias() throws ParseException {
     label_1:
     while (true) {
+      sentencia();
       if (jj_2_1(2)) {
         ;
       } else {
         break label_1;
       }
-      sentencia();
     }
   }
 
@@ -1674,6 +1674,16 @@ import java.io.*;
     finally { jj_save(111, xla); }
   }
 
+  static private boolean jj_3R_53() {
+    if (jj_3R_54()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3_82()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
   static private boolean jj_3_68() {
     if (jj_scan_token(SINO)) return true;
     if (jj_scan_token(LLA1)) return true;
@@ -2822,16 +2832,6 @@ import java.io.*;
   static private boolean jj_3_83() {
     if (jj_scan_token(NOT)) return true;
     if (jj_3R_55()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_53() {
-    if (jj_3R_54()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3_82()) { jj_scanpos = xsp; break; }
-    }
     return false;
   }
 
