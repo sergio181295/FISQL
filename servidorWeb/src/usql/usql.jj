@@ -4,7 +4,7 @@ options
 }
 PARSER_BEGIN(usql)
 package usql;
-import java.io.*;
+import compilador.nodoParser;
  public class usql{
  }
 PARSER_END(usql)
@@ -112,331 +112,962 @@ TOKEN [IGNORE_CASE]:{
 
 
 
-public boolean inicio():{}{
-    sentencias(){
+public nodoparser inicio():{ 
+    nodoparser raiz = new nodoparser("inicio","inicio"); 
+    nodoparser hijo;
+}{
+    hijo = sentencias(){
         System.out.println("Compilacion correcta!!");
-        return true;
+        raiz.agregarHijo(hijo);
+        return raiz;
     }
 }
 
-void sentencias():{}{
-    (sentencia())*
+nodoparser sentencias():{
+    nodoparser sentencias = new nodoparser("sentencias","sentencias");
+    nodoparser h;
+}{
+    (
+        h = sentencia(){
+            sentencias.agregarHijo(h);
+        }
+    )*{
+        return sentencias;
+    }
+
+    
 }
 
-void sentencia():{}{
-    ddl()
-    |dml()
-    |dcl()
-    |ssl()
+nodoparser sentencia():{
+    nodoparser h;
+}{
+    h = ddl(){
+        nodoparser ddl = new nodoparser("ddl","ddl");
+        ddl.agregarHijo(h);
+        return ddl;
+    }
+    |h = dml(){
+        nodoparser dml = new nodoparser("dml","dml");
+        dml.agregarHijo(h);
+        return dml;
+    }
+    |h = dcl(){
+        nodoparser dcl = new nodoparser("dcl","dcl");
+        dcl.agregarHijo(h);
+        return dcl;
+    }
+    |h = ssl(){
+        nodoparser ssl = new nodoparser("ssl","ssl");
+        ssl.agregarHijo(h);
+        return ssl;
+    }
 }
 
 /** SENTENCIAS DDL */
-    void ddl():{}{
-        crear()
-        |usar()
-        |alterar()
-        |eliminar()
-        |backup()
-        |restaurar()
-        |retorno()
+    nodoparser ddl():{
+        nodoparser h;
+        nodoparser p;
+    }{
+        h = crear(){
+            return h;
+        }
+        |h = usar(){
+            return h;
+        }
+        |h = alterar(){
+            return h;
+        }
+        |h = eliminar(){
+            return h;
+        }
+        |h = backup(){
+            return h;
+        }
+        |h = restaurar(){
+            return h;
+        }
+        |h = retorno(){
+            return h;
+        }
     }
 
     //DDL CREAR
-        void crear():{}{
-            <CREAR> crearCosa()
+        nodoparser crear():{
+            nodoparser h;
+        }{
+            <CREAR> h = crearCosa(){ 
+                return h; 
+            }
         }
 
-        void crearCosa():{}{
-            <BASE_DATOS> <ID> <PUNTOYCOMA>
-            |<TABLA> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
-            |<OBJETO> <ID> <PAR1> atrTabla() <PAR2> <PUNTOYCOMA>
-            |<PROCEDIMIENTO> <ID> <PAR1> atrTabla() <PAR2> <LLA1> sentencias()  <LLA2>
-            |<FUNCION> <ID> <PAR1> atrTabla() <PAR2> tipo() <LLA1> sentencias() <LLA2>
-            |<USUARIO> <ID> <COLOCAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
+        nodoparser crearCosa():{
+            Token t,p;
+            nodoparser sentencias, tipo, valor;
+        }{
+            <BASE_DATOS> t=<ID> <PUNTOYCOMA>{
+                nodoparser crear = new nodoparser(constantes.crear,constantes.crear);
+
+                nodoparser obj = new nodoparser(constantes.base_datos,constantes.base_datos);
+                crear.agregarHijo(obj);
+
+                nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                crear.agregarHijo(nombre);
+                return crear;
+            }
+            |<TABLA> t=<ID> <PAR1>{
+                nodoparser crear = new nodoparser(constantes.crear,constantes.crear);
+
+                // nodoparser obj = new nodoparser(constantes.tabla,constantes.tabla);
+                // crear.agregarHijo(obj);
+                crear.agregarHijo(new nodoparser(constantes.tabla,constantes.tabla));
+
+                // nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                // crear.agregarHijo(nombre);
+                crear.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            }atrTabla(crear) <PAR2> <PUNTOYCOMA>{
+                return crear;
+            }
+            |<OBJETO> t=<ID> <PAR1>{
+                String hola;
+                nodoparser crear = new nodoparser(constantes.crear,constantes.crear);
+
+                // nodoparser obj = new nodoparser(constantes.objeto,constantes.objeto);
+                // crear.agregarHijo(obj);
+                crear.agregarHijo(new nodoparser(constantes.objeto,constantes.objeto));
+                
+                // nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                // crear.agregarHijo(nombre);
+                crear.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            } atrTabla(crear) <PAR2> <PUNTOYCOMA>{
+                return crear;
+            }
+            |<PROCEDIMIENTO> t=<ID> <PAR1>{
+                nodoparser crear = new nodoparser(constantes.crear, constantes.crear);
+
+                // nodoparser obj = new nodoparser(constantes.procedimiento,constantes.procedimiento);
+                // crear.agregarHijo(obj);
+                crear.agregarHijo(new nodoparser(constantes.procedimiento,constantes.procedimiento));
+                
+                // nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                // crear.agregarHijo(nombre);
+                crear.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            } atrTabla(crear) <PAR2> <LLA1> sentencias=sentencias()  <LLA2>{
+                crear.agregarHijo(sentencias);
+                return crear;
+            }
+            |<FUNCION> t=<ID> <PAR1>{
+                nodoparser crear = new nodoparser(constantes.crear, constantes.crear);
+
+                // nodoparser obj = new nodoparser(constantes.funcion,constantes.funcion);
+                // crear.agregarHijo(obj);
+                crear.agregarHijo(new nodoparser(constantes.funcion,constantes.funcion));
+                
+                // nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                // crear.agregarHijo(nombre);
+                crear.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            } atrTabla(crear) <PAR2> tipo=tipo() <LLA1> sentencias=sentencias() <LLA2>{
+                crear.agregarHijo(tipo);
+                crear.agregarHijo(sentencias);
+                return crear;
+            }
+            |<USUARIO> t=<ID> <COLOCAR> p=<PASSWORD> <IGUAL> valor=valor() <PUNTOYCOMA>{
+                nodoparser crear = new nodoparser(constantes.crear, constantes.crear);
+
+                // nodoparser obj = new nodoparser(constantes.usuario,constantes.usuario);
+                // crear.agregarHijo(obj);
+                crear.agregarHijo(new nodoparser(constantes.usuario,constantes.usuario));
+                
+                // nodoparser nombre = new nodoparser(constantes.id,t.toString().toLowerCase());
+                // crear.agregarHijo(nombre);
+                crear.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+
+                crear.agregarHijo(valor);
+            }
         }
 
-        void atrTabla():{}{
-          tipo() <ID> (complemento())* (<COMA> tipo() <ID> (complemento())*)*
+        void atrTabla(nodoparser p):{
+            nodoparser tipo;
+            nodoparser complemento;
+            Token t;
+        }{
+            tipo=tipo() t=<ID>{
+                nodoparser atr = new nodoparser("atrTabla","atrTabla");
+                atr.agregarHijo(tipo);
+                atr.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            }(complemento=complemento(){
+                atr.agregarHijo(complemento);
+            })*{
+                p.agregarHijo(atr);
+            }(<COMA> tipo=tipo() t=<ID>{
+                nodoparser atr2 = new nodoparser("atrTabla","atrTabla");
+                atr2.agregarHijo(tipo);
+                atr2.agregarHijo(new nodoparser(constantes.id,t.toString().toLowerCase()));
+            } (complemento=complemento(){
+                atr2.agregarHijo(complemento);
+            })*{
+                p.agregarHijo(atr2);
+            })*
         } 
 
-        void complemento():{}{
-            <NULO> 
-            |<NO_NULO>
-            |<AUTOINCREMENTABLE>
-            |<LLAVE_PRIMARIA>
-            |<LLAVE_FORANEA> <ID>
-            |<UNICO>
+        nodoparser complemento():{
+            Token t;
+        }{
+            <NULO> {
+                return new nodoparser("complemento",constantes.nulo);
+            }
+            |<NO_NULO>{
+                return new nodoparser("complemento",constantes.no_nulo);
+            }
+            |<AUTOINCREMENTABLE>{
+                return new nodoparser("complemento",constantes.autoincrementable);
+            }
+            |<LLAVE_PRIMARIA>{
+                return new nodoparser("complemento",constantes.llave_primaria);
+            }
+            |<LLAVE_FORANEA> t=<ID>{
+                nodoparser foranea = new nodoparser("complemento", constantes.llave_foranea);
+                nodoparser id = new nodoparser(constantes.id,t.toString().toLowerCase());
+
+                foranea.agregarHijo(id);
+
+                return foranea;
+            }
+            |<UNICO>{
+                return new nodoparser("complemento",constantes.unico);
+            }
         }
 
-        void retorno():{}{
-            <RETORNO> valor() <PUNTOYCOMA>
+        nodoparser retorno():{
+            nodoparser valor;
+        }{
+            <RETORNO> valor=valor() <PUNTOYCOMA>{
+                nodoparser retorno = new nodoparser(constantes.retorno, constantes.retorno);
+                retorno.agregarHijo(valor);
+                return retorno;
+            }
         }
 
     //DDL USAR
-        void usar():{}{
-            <USAR> <ID> <PUNTOYCOMA>
+        nodoparser usar():{
+            Token id;
+        }{
+            <USAR> id=<ID> <PUNTOYCOMA>{
+                nodoparser usar = new nodoparser(constantes.usar, constantes.usar);
+                usar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                return usar;
+            }
         }
 
     //DDL ALTERAR
-        void alterar():{}{
-            <ALTERAR> alterarCosa()
+        nodoparser alterar():{
+            nodoparser obj;
+        }{
+            <ALTERAR> obj=alterarCosa(){
+                return obj;
+            }
         }
 
-        void alterarCosa():{}{
-            <TABLA> <ID> tipoAlterar() <PUNTOYCOMA>
-            |<OBJETO> <ID> tipoAlterar() <PUNTOYCOMA>
-            |<USUARIO> <ID> <CAMBIAR> <PASSWORD> <IGUAL> valor() <PUNTOYCOMA>
+        nodoparser alterarCosa():{
+            Token id;
+            nodoparser tipo, valor;
+        }{
+            <TABLA> id=<ID> tipo=tipoAlterar() <PUNTOYCOMA>{
+                nodoparser alterar = new nodoparser(constantes.alterar, constantes.alterar);
+                alterar.agregarHijo(new nodoparser(constantes.tabla, constantes.tabla));
+                alterar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                alterar.agregarHijo(tipo);
+                return alterar;
+            }
+            |<OBJETO> id=<ID> tipo=tipoAlterar() <PUNTOYCOMA>{
+                nodoparser alterar = new nodoparser(constantes.alterar, constantes.alterar);
+                alterar.agregarHijo(new nodoparser(constantes.objeto, constantes.objeto));
+                alterar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                alterar.agregarHijo(tipo);
+                return alterar;
+            }
+            |<USUARIO> id=<ID> <CAMBIAR> <PASSWORD> <IGUAL> valor=valor() <PUNTOYCOMA>{
+                nodoparser alterar = new nodoparser(constantes.alterar, constantes.alterar);
+                alterar.agregarHijo(new nodoparser(constantes.usuario, constantes.usuario));
+                alterar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                alterar.agregarHijo(valor);
+                return alterar;
+            }
         }
 
-        void tipoAlterar():{}{
-            <AGREGAR> <PAR1> atrTabla() <PAR2>
-            |<QUITAR> enviados()
+        nodoparser tipoAlterar():{
+            nodoparser enviados;
+        }{
+            <AGREGAR> <PAR1>{
+                nodoparser agregar = new nodoparser(constantes.agregar, constantes.agregar);
+            } atrTabla(agregar) <PAR2>{
+                return agregar;
+            }
+            |<QUITAR> enviados=enviados(){
+                nodoparser quitar = new nodoparser(constantes.quitar, constantes.quitar);
+                quitar.agregarHijo(enviados);
+                return quitar;
+            }
         }
     
     //DDL ELIMINAR
-        void eliminar():{}{
-            <ELIMINAR> eliminarCosa()
+        nodoparser eliminar():{
+            nodoparser eliminar = new nodoparser(constantes.eliminar, constantes.eliminar);
+        }{
+            <ELIMINAR> eliminarCosa(eliminar){
+                return eliminar;
+            }
         }
 
-        void eliminarCosa():{}{
-            <TABLA> <ID> <PUNTOYCOMA>
-            |<BASE_DATOS> <ID> <PUNTOYCOMA>
-            |<OBJETO> <ID> <PUNTOYCOMA>
-            |<USUARIO> <ID> <PUNTOYCOMA>    
+        void eliminarCosa(nodoparser p):{
+            Token id;
+        }{
+            <TABLA> id=<ID> <PUNTOYCOMA>{
+                p.agregarHijo(new nodoparser(constantes.tabla, constantes.tabla));
+                p.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+            }
+            |<BASE_DATOS> id=<ID> <PUNTOYCOMA>{
+                p.agregarHijo(new nodoparser(constantes.base_datos, constantes.base_datos));
+                p.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+            }
+            |<OBJETO> id=<ID> <PUNTOYCOMA>{
+                p.agregarHijo(new nodoparser(constantes.objeto, constantes.objeto));
+                p.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+            }
+            |<USUARIO> id=<ID> <PUNTOYCOMA>{
+                p.agregarHijo(new nodoparser(constantes.usuario, constantes.usuario));
+                p.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+            }    
         }
 
     //DDL BACKUP
-        void backup():{}{
-            <BACKUP> tipoBackup() <ID> <ID> <PUNTOYCOMA>
+        nodoparser backup():{
+            Token id1, id2;
+            nodoparser tipo;
+        }{
+            <BACKUP>  tipo=tipoBackup() id1=<ID> id2=<ID> <PUNTOYCOMA>{
+                nodoparser backup = new nodoparser(constantes.backup, constantes.backup);
+                backup.agregarHijo(tipo);
+                backup.agregarHijo(new nodoparser(constantes.id, id1.toString().toLowerCase()));
+                backup.agregarHijo(new nodoparser(constantes.id, id2.toString().toLowerCase()));
+                return backup;
+            }
         }
 
-        void tipoBackup():{}{
-            <USQLDUMP>
-            |<COMPLETO>
+        nodoparser tipoBackup():{}{
+            <USQLDUMP>{
+                return new nodoparser(constantes.usqldump, constantes.usqldump);
+            }
+            |<COMPLETO>{
+                return new nodoparser(constantes.completo, constantes.completo);
+            }
         }
 
     //DDL RESTAURAR
-        void restaurar():{}{
-            <RESTAURAR> tipoBackup() <CADENA> <PUNTOYCOMA>
+        nodoparser restaurar():{
+            Token cad;
+            nodoparser tipo;
+        }{
+            <RESTAURAR> tipo=tipoBackup() cad=<CADENA> <PUNTOYCOMA>{
+                nodoparser restaurar = new nodoparser(constantes.restaurar, constantes.restaurar);
+                restaurar.agregarHijo(tipo);
+                restaurar.agregarHijo(new nodoparser(constantes.cadena, cad.toString().replaceAll("\"", "")));
+                return restaurar;
+            }
         }
 
 /** SENTENCIAS DML */
-      void dml():{}{ 
-        insertar() 
-        |actualizar() <PUNTOYCOMA>
-        |borrar() <PUNTOYCOMA>
-        |seleccionar() <PUNTOYCOMA>
+      nodoparser dml():{
+          nodoparser h;
+      }{ 
+        h=insertar(){
+            return h;
+        } 
+        |h=actualizar() <PUNTOYCOMA>{
+            return h;
+        } 
+        |h=borrar() <PUNTOYCOMA>{
+            return h;
+        } 
+        |h=seleccionar() <PUNTOYCOMA>{
+            return h;
+        } 
       }
       //DML INSERTAR
-            void insertar():{}{ 
-                <INSERTAR> <EN> <TABLA> <ID> <PAR1> enviados() <PAR2> (<VALORES> <PAR1> enviados() <PAR2>)? <PUNTOYCOMA>
+            nodoparser insertar():{
+                Token id;
+                nodoparser env1, env2;
+            }{ 
+                <INSERTAR> <EN> <TABLA> id=<ID> <PAR1> env1=enviados(){
+                    nodoparser insertar = new nodoparser(constantes.insertar, constantes.insertar);
+                    insertar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                    insertar.agregarHijo(env1);
+                }<PAR2> (<VALORES> <PAR1> env2=enviados() <PAR2>{
+                    insertar.agregarHijo(env2);
+                })? <PUNTOYCOMA>{
+                    return insertar;
+                }
             }
 
 
       //DML ACTUALIZAR
-            void actualizar():{}{ 
-                <ACTUALIZAR> <TABLA> <ID> <PAR1> enviados() <PAR2> <VALORES> <PAR1> enviados() <PAR2> (restricciones())*
+            nodoparser actualizar():{
+                Token id;
+                nodoparser env1, env2, rest;
+            }{ 
+                <ACTUALIZAR> <TABLA> id=<ID> <PAR1> env1=enviados() <PAR2> <VALORES> <PAR1> env2=enviados() <PAR2>{
+                    nodoparser actualizar = new nodoparser(constantes.actualizar, constantes.actualizar);
+                    actualizar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                    actualizar.agregarHijo(env1);
+                    actualizar.agregarHijo(env2);
+                }(rest=restricciones(){
+                    actualizar.agregarHijo(rest);
+                })*{
+                    return actualizar;
+                }
             }
 
-            void restricciones():{}{
-                <DONDE> valor()
-                |<ORDENAR_POR> <ID> tipoOrden()
+            nodoparser restricciones():{
+                Token id;
+                nodoparser aux;
+            }{
+                <DONDE> aux=valor(){
+                    nodoparser donde = new nodoparser(constantes.donde, constantes.donde);
+                    donde.agregarHijo(aux);
+                    return donde;
+                }
+                |<ORDENAR_POR> id=<ID> aux=tipoOrden(){
+                    nodoparser ordenar = new nodoparser(constantes.ordenar, constantes.ordenar);
+                    ordenar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                    ordenar.agregarHijo(aux);
+                    return ordenar;
+                }
             }
 
       //DML BORRAR
-            void borrar():{}{ 
-                <BORRAR> <EN> <TABLA> <ID> (restricciones())*
+            nodoparser borrar():{
+                Token id;
+                nodoparser rest;
+            }{ 
+                <BORRAR> <EN> <TABLA> id=<ID>{
+                    nodoparser borrar = new nodoparser(constantes.borrar, constantes.borrar);
+                    borrar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                }(rest=restricciones(){
+                    borrar.agregarHijo(rest);
+                })*{
+                    return borrar;
+                }
             }
 
       //DML SELECCIONAR
-            void seleccionar():{}{ 
-                <SELECCIONAR> seleccionCampos() <DE> enviados() (restricciones())*
+            nodoparser seleccionar():{
+                nodoparser sel, env, rest;
+            }{ 
+                <SELECCIONAR> sel=seleccionCampos() <DE> env=enviados(){
+                    nodoparser seleccionar = new nodoparser(constantes.seleccionar, constantes.seleccionar);
+                    seleccionar. agregarHijo(sel);
+                    seleccionar. agregarHijo(env);
+                }(rest=restricciones(){
+                    seleccionar.agregarHijo(rest);
+                })*{
+                    return seleccionar;
+                }
             }
 
-            void tipoOrden():{}{ 
-                <ASC>
-                |<DESC>
+            nodoparser tipoOrden():{}{ 
+                <ASC>{
+                    return new nodoparser(constantes.asc, constantes.asc);
+                }
+                |<DESC>{
+                    return new nodoparser(constantes.desc, constantes.desc);
+                }
             }
 
-            void seleccionCampos():{}{ 
-                <ASTERISCO>
-                |enviados()
+            nodoparser seleccionCampos():{
+                nodoparser env;
+            }{ 
+                <ASTERISCO>{
+                    return new nodoparser(constantes.asterisco, constantes.asterisco);
+                }
+                |env=enviados(){
+                    return env;
+                }
             }
 
 /** SENTENCIAS DCL */
-      void dcl():{}{ 
-        otorgar()
-        |denegar()
+      nodoparser dcl():{
+          nodoparser h;
+      }{ 
+        h=otorgar(){
+            return h;
+        }
+        |h=denegar(){
+            return h;
+        }
       }
 
       //DCL OTORGAR
-            void otorgar():{}{ 
-                <OTORGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
+            nodoparser otorgar():{
+                Token id, id2;
+                nodoparser sel;
+            }{ 
+                <OTORGAR> <PERMISOS> id=<ID> <COMA> id2=<ID> <PUNTO> sel=seleccionCampos() <PUNTOYCOMA>{
+                    nodoparser otorgar = new nodoparser(constantes.otorgar, constantes.otorgar);
+                    otorgar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                    otorgar.agregarHijo(new nodoparser(constantes.id, id2.toString().toLowerCase()));
+                    otorgar.agregarHijo(sel);
+                    return otorgar;
+                }
             }
       //DCL DENEGAR
-            void denegar():{}{ 
-                <DENEGAR> <PERMISOS> <ID> <COMA> <ID> <PUNTO> seleccionCampos() <PUNTOYCOMA>
+            nodoparser denegar():{
+                Token id, id2;
+                nodoparser sel;
+            }{ 
+                <DENEGAR> <PERMISOS> id=<ID> <COMA> id2=<ID> <PUNTO> sel=seleccionCampos() <PUNTOYCOMA>{
+                    nodoparser denegar = new nodoparser(constantes.denegar, constantes.denegar);
+                    denegar.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                    denegar.agregarHijo(new nodoparser(constantes.id, id2.toString().toLowerCase()));
+                    denegar.agregarHijo(sel);
+                    return denegar;
+                }
             }
 
 /** SENTENCIAS SSL */
-      void ssl():{}{ 
-        declaracion() <PUNTOYCOMA>
-        |asignacion()
-        |si()
-        |selecciona()
-        |para()
-        |mientras()
-        |detener()
-        |imprimir()
-        |fecha()
-        |fechahora()
-        |contar() <PUNTOYCOMA>
+      nodoparser ssl():{
+          nodoparser h;
+      }{ 
+        h=declaracion() <PUNTOYCOMA>{
+            return h;
+        }
+        |h=asignacion(){
+            return h;
+        }
+        |h=si(){
+            return h;
+        }
+        |h=selecciona(){
+            return h;
+        }
+        |h=para(){
+            return h;
+        }
+        |h=mientras(){
+            return h;
+        }
+        |h=detener(){
+            return h;
+        }
+        |h=imprimir(){
+            return h;
+        }
+        |h=fecha(){
+            return h;
+        }
+        |h=fechahora(){
+            return h;
+        }
+        |h=contar() <PUNTOYCOMA>{
+            return h;
+        }
       }
 
       //SSL DECLARACION
-            void declaracion():{}{ 
-                <DECLARAR> <ID> (<COMA> <ID>)* tipo() (<IGUAL> valor())?
+            nodoparser declaracion():{
+                Token id, id2;
+                nodoparser tipo, valor;
+            }{ 
+                <DECLARAR> id=<ID>{
+                    nodoparser declaracion = new nodoparser("declaracion", "declaracion");
+                    nodoparser aux = new nodoparser("variables","variables");
+                    aux.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+                }(<COMA> id2=<ID>{
+                    aux.agregarHijo(new nodoparser(constantes.id, id2.toString().toLowerCase()));
+                })* tipo=tipo(){
+                    declaracion.agregarHijo(tipo);
+                    declaracion.agregarHijo(aux);
+                }(<IGUAL> valor=valor(){
+                    declaracion.agregarHijo(valor);
+                })?{
+                    return declaracion;
+                }
             }
 
       //SSL ASIGNACION
-            void asignacion():{}{ 
-                llamada() <IGUAL> valor() <PUNTOYCOMA>
+            nodoparser asignacion():{
+                nodoparser llamada, valor;
+            }{ 
+                llamada=llamada() <IGUAL> valor=valor() <PUNTOYCOMA>{
+                    nodoparser asignacion = new nodoparser("asignacion", "asignacion");
+                    asignacion.agregarHijo(llamada);
+                    asignacion.agregarHijo(valor);
+                    return asignacion;
+                }
             }
 
       //SSL SI
-            void si():{}{ 
-                <SI> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2> (<SINO> <LLA1> sentencias() <LLA2>)?
+            nodoparser si():{
+                nodoparser valor, sentencias, sentencias2;
+            }{ 
+                <SI> <PAR1> valor=valor() <PAR2> <LLA1>  sentencias=sentencias() <LLA2>{
+                    nodoparser si = new nodoparser(constantes.si, constantes.si);
+                    si.agregarHijo(valor);
+                    si.agregarHijo(sentencias);
+                }(<SINO> <LLA1>  sentencias2=sentencias() <LLA2>{
+                    si.agregarHijo(sentencias2);
+                })?{
+                    return si;
+                }
             }
 
       //SS SELECCIONA
-            void selecciona():{}{ 
-                <SELECCIONA> <PAR1> valor() <PAR2> <LLA1> (caso())+ <LLA2>
+            nodoparser selecciona():{
+                nodoparser valor, caso;
+            }{ 
+                <SELECCIONA> <PAR1> valor=valor() <PAR2>{
+                    nodoparser selecciona = new nodoparser(constantes.selecciona, constantes.selecciona);
+                    selecciona.agregarHijo(valor);
+                }<LLA1> (caso=caso(){
+                    selecciona.agregarHijo(caso);
+                })+ <LLA2>{
+                    return selecciona;
+                }
             }
 
-            void caso():{}{ 
-                <CASO> valor() <DOSPUNTOS> sentencias()
-                |<DEFECTO> <DOSPUNTOS> sentencias()
+            nodoparser caso():{
+                nodoparser valor, sentencias;
+            }{ 
+                <CASO> valor=valor() <DOSPUNTOS> sentencias=sentencias(){
+                    nodoparser caso = new nodoparser(constantes.caso, constantes.caso);
+                    caso.agregarHijo(valor);
+                    caso.agregarHijo(sentencias);
+                    return caso;
+                }
+                |<DEFECTO> <DOSPUNTOS> sentencias=sentencias(){
+                    nodoparser caso = new nodoparser(constantes.defecto, constantes.defecto);
+                    caso.agregarHijo(sentencias);
+                    return caso;
+                }
             }
 
       //SSL PARA
-            void para():{}{ 
-                <PARA> <PAR1> <DECLARAR> <ID> <INTEGER> <IGUAL> valor() <PUNTOYCOMA> valor() <PUNTOYCOMA> paso() <PAR2> <LLA1> sentencias() <LLA2>
+            nodoparser para():{
+                nodoparser declaracion, valor, paso, sentencias;
+            }{ 
+                <PARA> <PAR1> declaracion=declaracion() <PUNTOYCOMA> valor=valor() <PUNTOYCOMA> paso=paso() <PAR2> <LLA1> sentencias=sentencias() <LLA2>{
+                    nodoparser para = new nodoparser(constantes.para, constantes.para);
+                    para.agregarHijo(declaracion);
+                    para.agregarHijo(valor);
+                    para.agregarHijo(paso);
+                    para.agregarHijo(sentencias);
+                    return para;
+                }
             }
 
-            void paso():{}{ 
-                <MASMAS>
-                |<MENOSMENOS>
+            nodoparser paso():{}{ 
+                <MASMAS>{
+                    return new nodoparser("++","++");
+                }
+                |<MENOSMENOS>{
+                    return new nodoparser("--","--");
+                }
             }
 
       //SSL MIENTRAS
-            void mientras():{}{ 
-                <MIENTRAS> <PAR1> valor() <PAR2> <LLA1> sentencias() <LLA2>
+            nodoparser mientras():{
+                nodoparser valor, sentencias;
+            }{ 
+                <MIENTRAS> <PAR1> valor=valor() <PAR2> <LLA1> sentencias=sentencias() <LLA2>{
+                    nodoparser mientras = new nodoparser(constantes.mientras, constantes.mientras);
+                    mientras.agregarHijo(valor);
+                    mientras.agregarHijo(sentencias);
+                    return mientras;
+                }
             }
 
       //SSL DETENER
-            void detener():{}{ 
-                <DETENER> <PUNTOYCOMA>
+            nodoparser detener():{}{ 
+                <DETENER> <PUNTOYCOMA>{
+                    return new nodoparser(constantes.detener, constantes.detener);
+                }
             }
 
       //SSL IMPRIMIR
-            void imprimir():{}{ 
-                <IMPRIMIR> <PAR1> valor() <PAR2> <PUNTOYCOMA>
+            nodoparser imprimir():{
+                nodoparser valor;
+            }{ 
+                <IMPRIMIR> <PAR1> valor=valor() <PAR2> <PUNTOYCOMA>{
+                    nodoparser imprimir = new nodoparser(constantes.imprimir, constantes.imprimir);
+                    imprimir.agregarHijo(valor);
+                    return imprimir;
+                }
             }
 
       //SSL FECHA Y HORA
-            void fecha():{}{ 
-                <FECHA> <PAR1> <PAR2> <PUNTOYCOMA>
+            nodoparser fecha():{}{ 
+                <FECHA> <PAR1> <PAR2> <PUNTOYCOMA>{
+                    return new nodoparser(constantes.fecha, constantes.fecha);
+                }
             }
 
-            void fechahora():{}{ 
-                <FECHA_HORA> <PAR1> <PAR2> <PUNTOYCOMA>
+            nodoparser fechahora():{}{ 
+                <FECHA_HORA> <PAR1> <PAR2> <PUNTOYCOMA>{
+                    return new nodoparser(constantes.fecha_hora, constantes.fecha_hora);
+                }
             }
 
       //SSL CONTAR
-            void contar():{}{ 
-                <CONTAR> <PAR1> <MENOR> <MENOR> seleccionar() <MAYOR> <MAYOR> <PAR2>
+            nodoparser contar():{
+                nodoparser seleccionar;
+            }{ 
+                <CONTAR> <PAR1> <MENOR> <MENOR> seleccionar=seleccionar() <MAYOR> <MAYOR> <PAR2>{
+                    nodoparser contar = new nodoparser(constantes.contar, constantes.contar);
+                    contar.agregarHijo(seleccionar);
+                    return contar;
+                }
             }
 
+
             
-void tipo():{}{ <TEXT>
-      |<INTEGER>
-      |<DOUBLE>
-      |<BOOL>
-      |<DATE>
-      |<DATETIME>
-      |<ID>
+nodoparser tipo():{
+    Token t;
+}{ 
+    <TEXT>{
+        return new nodoparser("tipo",constantes.text);
+    }
+    |<INTEGER>{
+        return new nodoparser("tipo",constantes.integer);
+    }
+    |<DOUBLE>{
+        return new nodoparser("tipo",constantes.doublee);
+    }
+    |<BOOL>{
+        return new nodoparser("tipo",constantes.booll);
+    }
+    |<DATE>{
+        return new nodoparser("tipo",constantes.datee);
+    }
+    |<DATETIME>{
+        return new nodoparser("tipo",constantes.datetime);
+    }
+    |t=<ID>{
+        return new nodoparser("tipo",t.toString().toLowerCase());
+    }
 }
 
 //VARIABLES INICIAN CON @
-
-void valor():{}{ 
-    valor2() (<OR> valor2())*
+nodoparser valor():{
+    nodoparser val;
+}{ 
+    val=valor2(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(val);
+    }(<OR> val=valor2(){
+        nuevo.agregarHijo(new nodoparser("or", "||"));
+        nuevo.agregarHijo(val);
+    })*{
+        return nuevo;
+    }
 }
 
-void valor2():{}{ 
-    valor3() (<AND> valor3())*
+nodoparser valor2():{
+    nodoparser val;
+}{ 
+    val=valor3(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(val);
+    }(<AND> val=valor3(){
+        nuevo.agregarHijo(new nodoparser("and", "&&"));
+        nuevo.agregarHijo(val);
+    })*{
+        return nuevo;
+    }
 }
 
 
-void valor3():{}{ 
-    <NOT> valor4()
-    |valor4()
+nodoparser valor3():{
+    nodoparser val;
+}{ 
+    <NOT> val=valor4(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(new nodoparser("not", "!"));
+        nuevo.agregarHijo(val);
+        return nuevo;
+    }
+    |val=valor4(){
+        return val;
+    }
 }
 
-void valor4():{}{ 
-    valor5() (valor4P())*
+nodoparser valor4():{
+    nodoparser val;
+}{ 
+    val=valor5(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(val);
+    }(valor4P(nuevo))*{
+        return nuevo;
+    }
 }
 
-void valor4P():{}{ 
-    <MAYOR> valor5() 
-      |<MENOR> valor5() 
-      |<MAYORIGUAL> valor5() 
-      |<MENORIGUAL> valor5() 
-      |<IGUALIGUAL> valor5() 
-      |<NOIGUAL> valor5() 
+void valor4P(nodoparser p):{
+    nodoparser val;
+}{ 
+    <MAYOR> val=valor5(){
+        p.agregarHijo(new nodoparser("mayor",">"));
+        p.agregarHijo(val);
+    }
+      |<MENOR> val=valor5(){
+          p.agregarHijo(new nodoparser("menor", "<"));
+          p.agregarHijo(val);
+      }
+      |<MAYORIGUAL> val=valor5(){
+        p.agregarHijo(new nodoparser("mayorigual", ">="));
+        p.agregarHijo(val);
+      }
+      |<MENORIGUAL> val=valor5(){
+        p.agregarHijo(new nodoparser("menorigual", "<="));
+        p.agregarHijo(val);
+      }
+      |<IGUALIGUAL> val=valor5(){
+        p.agregarHijo(new nodoparser("igualigual", "=="));
+        p.agregarHijo(val);
+      }
+      |<NOIGUAL> val=valor5(){
+        p.agregarHijo(new nodoparser("noigual", "!="));
+        p.agregarHijo(val);
+      }
 }
 
-void valor5():{}{ 
-    valor6() (valor5P())*
+nodoparser valor5():{
+    nodoparser val;
+}{ 
+    val=valor6(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(val);
+    }(valor5P(nuevo))*{
+        return nuevo;
+    }
 }
 
-void valor5P():{}{ 
-    <MAS> valor6() 
-    |<MENOS> valor6() 
+void valor5P(nodoparser p):{
+    nodoparser val;
+}{ 
+    <MAS> val=valor6(){
+        p.agregarHijo(new nodoparser("mas","+"));
+        p.agregarHijo(val);
+    } 
+    |<MENOS> val=valor6(){
+        p.agregarHijo(new nodoparser("menos","-"));
+        p.agregarHijo(val);
+    } 
 }
 
-void valor6():{}{ 
-    valor7() (valor6P())*
+nodoparser valor6():{
+    nodoparser val;
+}{ 
+    val=valor7(){
+        nodoparser nuevo = new nodoparser("valor", "valor");
+        nuevo.agregarHijo(val);
+    }(valor6P(nuevo))*{
+        return nuevo;
+    }
 }
 
-void valor6P():{}{ 
-    <POR> valor7()
-    |<DIV> valor7() 
+void valor6P(nodoparser p):{
+    nodoparser val;
+}{ 
+    <POR> val=valor7(){
+        p.agregarHijo(new nodoparser("por","*"));
+        p.agregarHijo(val);
+    }
+    |<DIV> val=valor7(){
+        p.agregarHijo(new nodoparser("div","/"));
+        p.agregarHijo(val);
+    }
 }
 
-void valor7():{}{ 
-    valor9() (<POT> valor9())*
+nodoparser valor7():{
+    nodoparser val1, val2;
+}{ 
+    val1=valor9(){
+        nodoparser nuevo = new nodoparser("valor","valor");
+        nuevo.agregarHijo(val1);
+        
+    }(<POT> val2=valor9(){
+        nuevo.agregarHijo(new nodoparser("pot","^"));
+        nuevo.agregarHijo(val2);
+    })*{
+        return nuevo;
+    }
 }
 
-void valor9():{}{   
-    <CADENA>
-    |<NUMERO>
-    |<VERDADERO>
-    |<FALSO>
-    |<MENOS> valor9()
-    |llamada()
-    |fecha()
-    |fechahora()
-    |contar()
-    |<PAR1> valor() <PAR2>
+nodoparser valor9():{
+    Token val;
+    nodoparser aux;
+}{   
+    val=<CADENA>{
+        return new nodoparser(constantes.cadena, val.toString().replaceAll("\"", ""));
+    }
+    |val=<NUMERO>{
+        return new nodoparser(constantes.numero, val.toString());
+    }
+    |<VERDADERO>{
+        return new nodoparser(constantes.booll, constantes.verdadero);
+    }
+    |<FALSO>{
+        return new nodoparser(constantes.booll, constantes.falso);
+    }
+    |<MENOS> aux=valor9(){
+        nodoparser nuevo = new nodoparser("unario","unario");
+        nuevo.agregarHijo(aux);
+        return nuevo;
+    }
+    |aux=llamada(){
+        return aux;
+    }
+    |aux=fecha(){
+        return aux;
+    }
+    |aux=fechahora(){
+        return aux;
+    }
+    |aux=contar(){
+        return aux;
+    }
+    |<PAR1> aux=valor() <PAR2>{
+        return aux;
+    }
 }
 
-void llamada():{}{ 
-    <ID> (<PUNTO> <ID>)* (<PAR1> (enviados())? <PAR2>)?
+nodoparser llamada():{
+    Token id, id2;
+    nodoparser enviados;
+}{ 
+    id=<ID>{
+        nodoparser llamada = new nodoparser("llamada", "llamada");
+        llamada.agregarHijo(new nodoparser(constantes.id, id.toString().toLowerCase()));
+    }(<PUNTO> id2=<ID>{
+        llamada.agregarHijo(new nodoparser(constantes.punto, id2.toString().toLowerCase()));
+    })* (<PAR1> (enviados=enviados(){
+        llamada.agregarHijo(enviados);
+    })? <PAR2>)?{
+        return llamada;
+    }
 }
 
-void enviados():{}{ 
-    valor() (<COMA> valor())*
+nodoparser enviados():{
+    nodoparser valor, valor2;
+}{ 
+    valor=valor(){
+        nodoparser enviados = new nodoparser("enviados", "enviados");
+        enviados.agregarHijo(valor);
+    }(<COMA> valor2=valor(){
+        enviados.agregarHijo(valor2);
+    })*{
+        return enviados;
+    }
 }
+
+
 
 

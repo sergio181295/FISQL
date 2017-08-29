@@ -1,4 +1,4 @@
-package servidorweb;
+package compilador;
 
 public class GenerarAnalizadores {
     public static void main(String[] args) {
